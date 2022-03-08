@@ -71,8 +71,8 @@
                 <filteritem type="filepath" name="src/test/.*" desc="Test files"/>
             </filefilter>
             <filefilter name="defaultPolicyFilter" desc="Filters for compatibility，license header policies">
-                <filteritem type="filename" name="Makefile.am" desc="programmer defined file"/>
                 <filteritem type="filepath" name="po/.*" desc="portable object file"/>
+                <filteritem type="filename" name="Makefile.am" desc="programmer defined file"/>
             </filefilter>
         </filefilterlist>
     </oatconfig>
