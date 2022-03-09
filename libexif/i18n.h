@@ -23,7 +23,7 @@
 
 #include "config.h"
 
-#ifdef ENABLE_NLS
+#ifdef ENABLE_NLS_NEW
 #  include <libintl.h>
 #  undef _
 #  define _(String) dgettext (GETTEXT_PACKAGE, String)
