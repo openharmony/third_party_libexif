@@ -62,14 +62,17 @@
 
         <filefilterlist>
             <filefilter name="defaultFilter" desc="Files not to check">
-                <filteritem type="filename" name="*.iml|*.json|*.txt|*.jar|*.jpg" desc="desc files"/>
-                <filteritem type="filepath" name="target/.*" desc="Compile output files"/>
-                <filteritem type="filepath" name="out/.*" desc="Compile output files"/>
-                <filteritem type="filepath" name="log/.*" desc="log files"/>
-                <filteritem type="filepath" name=".idea/.*" desc="IDE temp files"/>
-                <filteritem type="filepath" name="projectroot/[a-zA-Z0-9]{20,}.sh" desc="Temp files"/>
-                <filteritem type="filepath" name="src/test/.*" desc="Test files"/>
+                <filteritem type="filepath" name=".*" desc="third party"/>
             </filefilter>
+            <filefilter name="copyrightPolicyFilter" desc="copyright policy filter" >
+                <filteritem type="filepath" name=".*" desc="third party"/>
+            </filefilter>
+            <filefilter name="licenseFileNamePolicyFilter" desc="Filters for LICENSE file policies">
+                <filteritem type="filepath" name=".*" desc="third party"/>
+            </filefilter>	
+            <filefilter name="binaryFileTypePolicyFilter" desc="Filters for binary file policies">
+                <filteritem type="filepath" name=".*" desc="third party"/>
+            </filefilter>	
             <filefilter name="defaultPolicyFilter" desc="Filters for compatibility，license header policies">
                 <filteritem type="filename" name="Makefile.am" desc="programmer defined file"/>
                 <filteritem type="filepath" name="po/.*" desc="portable object file"/>
