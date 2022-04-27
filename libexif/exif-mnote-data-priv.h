@@ -18,8 +18,8 @@
  * Boston, MA  02110-1301  USA.
  */
 
-#ifndef LIBEXIF_EXIF_MNOTE_DATA_PRIV_H
-#define LIBEXIF_EXIF_MNOTE_DATA_PRIV_H
+#ifndef __EXIF_MNOTE_DATA_PRIV_H__
+#define __EXIF_MNOTE_DATA_PRIV_H__
 
 #ifdef __cplusplus
 extern "C" {
@@ -83,4 +83,4 @@ void exif_mnote_data_set_offset     (ExifMnoteData *, unsigned int);
 }
 #endif /* __cplusplus */
 
-#endif /* !defined(LIBEXIF_EXIF_MNOTE_DATA_PRIV_H) */
+#endif /* __EXIF_MNOTE_PRIV_H__ */
