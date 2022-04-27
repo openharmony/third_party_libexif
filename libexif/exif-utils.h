@@ -22,8 +22,8 @@
  * SPDX-License-Identifier: LGPL-2.0-or-later
  */
 
-#ifndef LIBEXIF_EXIF_UTILS_H
-#define LIBEXIF_EXIF_UTILS_H
+#ifndef __EXIF_UTILS_H__
+#define __EXIF_UTILS_H__
 
 #ifdef __cplusplus
 extern "C" {
@@ -193,4 +193,4 @@ void exif_array_set_byte_order (ExifFormat, unsigned char *, unsigned int,
 }
 #endif /* __cplusplus */
 
-#endif /* !defined(LIBEXIF_EXIF_UTILS_H) */
+#endif /* __EXIF_UTILS_H__ */

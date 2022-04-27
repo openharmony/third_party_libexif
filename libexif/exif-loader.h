@@ -22,8 +22,8 @@
  * SPDX-License-Identifier: LGPL-2.0-or-later
  */
 
-#ifndef LIBEXIF_EXIF_LOADER_H
-#define LIBEXIF_EXIF_LOADER_H
+#ifndef __EXIF_LOADER_H__
+#define __EXIF_LOADER_H__
 
 #include <libexif/exif-data.h>
 #include <libexif/exif-log.h>
@@ -127,4 +127,4 @@ void exif_loader_log (ExifLoader *loader, ExifLog *log);
 }
 #endif /* __cplusplus */
 
-#endif /* !defined(LIBEXIF_EXIF_LOADER_H) */
+#endif /* __EXIF_LOADER_H__ */

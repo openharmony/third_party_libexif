@@ -5,7 +5,7 @@ dnl SPDX-License-Identifier: LGPL-2.0-or-later
 
 AC_DEFUN([CHECK_FAILMALLOC],[dnl
   dnl Libtool sets the default library paths
-  LT_INIT([win32-dll])
+  AM_PROG_LIBTOOL
   path_provided=
   failmalloc_requested=  dnl Either implicitly or explicitly
   AC_ARG_WITH(failmalloc, [  --with-failmalloc=PATH  use Failmalloc for tests], [

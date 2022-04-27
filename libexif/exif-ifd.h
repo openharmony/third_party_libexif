@@ -20,8 +20,8 @@
  * SPDX-License-Identifier: LGPL-2.1-or-later
  */
 
-#ifndef LIBEXIF_EXIF_IFD_H
-#define LIBEXIF_EXIF_IFD_H
+#ifndef __EXIF_IFD_H__
+#define __EXIF_IFD_H__
 
 #ifdef __cplusplus
 extern "C" {
@@ -50,4 +50,4 @@ const char *exif_ifd_get_name (ExifIfd ifd);
 }
 #endif /* __cplusplus */
 
-#endif /* !defined(LIBEXIF_EXIF_IFD_H) */
+#endif /* __EXIF_IFD_H__ */
