@@ -22,8 +22,8 @@
  * SPDX-License-Identifier: LGPL-2.0-or-later
  */
 
-#ifndef LIBEXIF_EXIF_SYSTEM_H
-#define LIBEXIF_EXIF_SYSTEM_H
+#ifndef EXIF_SYSTEM_H
+#define EXIF_SYSTEM_H
 
 #if defined(__GNUC__) && (__GNUC__ >= 2)
 # define UNUSED(param) UNUSED_PARAM_##param __attribute__((unused))
@@ -31,4 +31,4 @@
 # define UNUSED(param) param
 #endif
 
-#endif /* !defined(LIBEXIF_EXIF_SYSTEM_H) */
+#endif /* !defined(EXIF_SYSTEM_H) */

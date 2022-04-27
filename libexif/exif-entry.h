@@ -22,8 +22,8 @@
  * SPDX-License-Identifier: LGPL-2.0-or-later
  */
 
-#ifndef LIBEXIF_EXIF_ENTRY_H
-#define LIBEXIF_EXIF_ENTRY_H
+#ifndef __EXIF_ENTRY_H__
+#define __EXIF_ENTRY_H__
 
 #ifdef __cplusplus
 extern "C" {
@@ -185,4 +185,4 @@ void        exif_entry_dump      (ExifEntry *entry, unsigned int indent);
 }
 #endif /* __cplusplus */
 
-#endif /* !defined(LIBEXIF_EXIF_ENTRY_H) */
+#endif /* __EXIF_ENTRY_H__ */

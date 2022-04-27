@@ -22,8 +22,8 @@
  * SPDX-License-Identifier: LGPL-2.0-or-later
  */
 
-#ifndef LIBEXIF_EXIF_BYTE_ORDER_H
-#define LIBEXIF_EXIF_BYTE_ORDER_H
+#ifndef __EXIF_BYTE_ORDER_H__
+#define __EXIF_BYTE_ORDER_H__
 
 #ifdef __cplusplus
 extern "C" {
@@ -47,4 +47,4 @@ const char *exif_byte_order_get_name (ExifByteOrder order);
 }
 #endif /* __cplusplus */
 
-#endif /* !defined(LIBEXIF_EXIF_BYTE_ORDER_H) */
+#endif /* __EXIF_BYTE_ORDER_H__ */

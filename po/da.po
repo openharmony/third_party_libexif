@@ -1671,7 +1671,7 @@ msgstr "Objektivinfo"
 msgid "Ambience_Info"
 msgstr ""
 
-# Det at der tages flere billeder i det samme billede. Lad stå uoversat, 
+# Det at der tages flere billeder i det samme billede. Lad stå uoversat,
 # ellers "Flergangsbelysning".
 #: libexif/canon/mnote-canon-tag.c:107 libexif/olympus/mnote-olympus-tag.c:119
 #, fuzzy
@@ -1935,7 +1935,7 @@ msgstr "Optisk zoom"
 msgid "Camera Temperature"
 msgstr "Kameratemperatur"
 
-# Guide Number er et tal for, hvor kraftig blitzen er 
+# Guide Number er et tal for, hvor kraftig blitzen er
 # (http://en.wikipedia.org/wiki/Guide_number) Det danske ord er "ledetal" 
 #: libexif/canon/mnote-canon-tag.c:174
 msgid "Flash Guide Number"
@@ -1996,7 +1996,7 @@ msgstr "Belysningstid"
 msgid "Measured EV 2"
 msgstr "Målt EV"
 
-# Igen en af de svære - når man fotograferer 'Bulb' er der 
+# Igen en af de svære - når man fotograferer 'Bulb' er der
 # tale om lange belysningstider, tider som kameraet ikke selv 
 # kan 'dosere' typisk fra en 10-15 sekunder og mere. Jeg kender 
 # ikke til nogen danske ord for det.
@@ -5822,7 +5822,7 @@ msgstr "Farvetilstand"
 msgid "Light Type"
 msgstr "Lystype"
 
-# Jeg ikke særlig meget forstand på disse begreber, og jeg ved ikke 
+# Jeg ikke særlig meget forstand på disse begreber, og jeg ved ikke
 # om det bør være "Skud-ISO", "ISO-skud" eller "Skud, ISO".
 #: libexif/olympus/mnote-olympus-tag.c:75
 #, fuzzy

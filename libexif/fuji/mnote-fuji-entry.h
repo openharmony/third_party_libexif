@@ -20,8 +20,8 @@
  * SPDX-License-Identifier: LGPL-2.0-or-later
  */
 
-#ifndef LIBEXIF_MNOTE_FUJI_ENTRY_H
-#define LIBEXIF_MNOTE_FUJI_ENTRY_H
+#ifndef __MNOTE_FUJI_ENTRY_H__
+#define __MNOTE_FUJI_ENTRY_H__
 
 #include <libexif/exif-format.h>
 #include <libexif/fuji/mnote-fuji-tag.h>
@@ -44,4 +44,4 @@ struct _MnoteFujiEntry {
 
 char *mnote_fuji_entry_get_value (MnoteFujiEntry *entry, char *val, unsigned int maxlen);
 
-#endif /* !defined(LIBEXIF_MNOTE_FUJI_ENTRY_H) */
+#endif /* __MNOTE_FUJI_ENTRY_H__ */

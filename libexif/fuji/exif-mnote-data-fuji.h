@@ -20,8 +20,8 @@
  * SPDX-License-Identifier: LGPL-2.0-or-later
  */
 
-#ifndef LIBEXIF_EXIF_MNOTE_DATA_FUJI_H
-#define LIBEXIF_EXIF_MNOTE_DATA_FUJI_H
+#ifndef __MNOTE_FUJI_CONTENT_H__
+#define __MNOTE_FUJI_CONTENT_H__
 
 #include <libexif/exif-mnote-data.h>
 #include <libexif/exif-mnote-data-priv.h>
@@ -52,4 +52,4 @@ int exif_mnote_data_fuji_identify (const ExifData *ed, const ExifEntry *e);
 
 ExifMnoteData *exif_mnote_data_fuji_new (ExifMem *);
 
-#endif /* !defined(LIBEXIF_EXIF_MNOTE_DATA_FUJI_H) */
+#endif /* __MNOTE_FUJI_CONTENT_H__ */

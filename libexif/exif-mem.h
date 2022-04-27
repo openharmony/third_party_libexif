@@ -24,8 +24,8 @@
  * SPDX-License-Identifier: LGPL-2.0-or-later
  */
 
-#ifndef LIBEXIF_EXIF_MEM_H
-#define LIBEXIF_EXIF_MEM_H
+#ifndef __EXIF_MEM_H__
+#define __EXIF_MEM_H__
 
 #include <libexif/exif-utils.h>
 
@@ -90,4 +90,4 @@ ExifMem *exif_mem_new_default (void);
 }
 #endif /* __cplusplus */
 
-#endif /* !defined(LIBEXIF_EXIF_MEM_H) */
+#endif /* __EXIF_MEM_H__ */
