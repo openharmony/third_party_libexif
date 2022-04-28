@@ -18,8 +18,8 @@
  * Boston, MA  02110-1301  USA.
  */
 
-#ifndef LIBEXIF_EXIF_MNOTE_DATA_CANON_H
-#define LIBEXIF_EXIF_MNOTE_DATA_CANON_H
+#ifndef __EXIF_MNOTE_DATA_CANON_H__
+#define __EXIF_MNOTE_DATA_CANON_H__
 
 #include <libexif/exif-byte-order.h>
 #include <libexif/exif-mnote-data.h>
@@ -55,4 +55,4 @@ int exif_mnote_data_canon_identify (const ExifData *ed, const ExifEntry *e);
 
 ExifMnoteData *exif_mnote_data_canon_new (ExifMem *mem, ExifDataOption o);
 
-#endif /* !defined(LIBEXIF_EXIF_MNOTE_DATA_CANON_H) */
+#endif /* __EXIF_MNOTE_DATA_CANON_H__ */
