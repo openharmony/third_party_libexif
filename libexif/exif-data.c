@@ -30,7 +30,6 @@
 #include <libexif/i18n.h>
 #include <libexif/exif-system.h>
 
-#include <libexif/apple/exif-mnote-data-apple.h>
 #include <libexif/canon/exif-mnote-data-canon.h>
 #include <libexif/fuji/exif-mnote-data-fuji.h>
 #include <libexif/olympus/exif-mnote-data-olympus.h>
@@ -47,8 +46,6 @@
 #define JPEG_MARKER_APP0 0xe0
 #undef JPEG_MARKER_APP1
 #define JPEG_MARKER_APP1 0xe1
-
-#define CHECKOVERFLOW(offset,datasize,structsize) (( offset >= datasize) || (structsize > datasize) || (offset > datasize - structsize ))
 
 static const unsigned char ExifHeader[] = {0x45, 0x78, 0x69, 0x66, 0x00, 0x00};
 
@@ -330,7 +327,7 @@ exif_data_load_data_thumbnail (ExifData *data, const unsigned char *d,
 		exif_log (data->priv->log, EXIF_LOG_CODE_DEBUG, "ExifData", "Bogus thumbnail offset (%u).", o);
 		return;
 	}
-	if (CHECKOVERFLOW(o,ds,s)) {
+	if (s > ds - o) {
 		exif_log (data->priv->log, EXIF_LOG_CODE_DEBUG, "ExifData", "Bogus thumbnail size (%u), max would be %u.", s, ds-o);
 		return;
 	}
@@ -423,9 +420,9 @@ exif_data_load_data_content (ExifData *data, ExifIfd ifd,
 	}
 
 	/* Read the number of entries */
-	if (CHECKOVERFLOW(offset, ds, 2)) {
+	if ((offset + 2 < offset) || (offset + 2 < 2) || (offset + 2 > ds)) {
 		exif_log (data->priv->log, EXIF_LOG_CODE_CORRUPT_DATA, "ExifData",
-			  "Tag data past end of buffer (%u+2 > %u)", offset, ds);
+			  "Tag data past end of buffer (%u > %u)", offset+2, ds);
 		return;
 	}
 	n = exif_get_short (d + offset, data->priv->order);
@@ -434,7 +431,7 @@ exif_data_load_data_content (ExifData *data, ExifIfd ifd,
 	offset += 2;
 
 	/* Check if we have enough data. */
-	if (CHECKOVERFLOW(offset, ds, 12*n)) {
+	if (offset + 12 * n > ds) {
 		n = (ds - offset) / 12;
 		exif_log (data->priv->log, EXIF_LOG_CODE_DEBUG, "ExifData",
 				  "Short data; only loading %hu entries...", n);
@@ -817,10 +814,6 @@ interpret_maker_note(ExifData *data, const unsigned char *d, unsigned int ds)
 		exif_log (data->priv->log, EXIF_LOG_CODE_DEBUG,
 			"ExifData", "Pentax MakerNote variant type %d", mnoteid);
 		data->priv->md = exif_mnote_data_pentax_new (data->priv->mem);
-	} else if ((mnoteid = exif_mnote_data_apple_identify (data, e)) != 0) {
-		exif_log (data->priv->log, EXIF_LOG_CODE_DEBUG,
-			"ExifData", "Apple MakerNote variant type %d", mnoteid);
-		data->priv->md = exif_mnote_data_apple_new (data->priv->mem);
 	}
 
 	/* 
@@ -882,17 +875,9 @@ exif_data_load_data (ExifData *data, const unsigned char *d_orig,
 			}
 
 			/* JPEG_MARKER_APP1 */
-			if (ds && d[0] == JPEG_MARKER_APP1) {
-				/*
-				 * Verify the exif header
-				 * (offset 3, length 6).
-				 * FF E1 NN NN EXIFHEADER
-				 *    ^^ d points here currently
-				 */
-				if ((ds >= 9) && !memcmp (d+3, ExifHeader, 6))
-					break;
-				/* fallthrough */
-			}
+			if (ds && d[0] == JPEG_MARKER_APP1)
+				break;
+
 			/* Skip irrelevant APP markers. The branch for APP1 must come before this,
 			   otherwise this code block will cause APP1 to be skipped. This code path
 			   is only relevant for files that are nonconformant to the EXIF
@@ -901,7 +886,7 @@ exif_data_load_data (ExifData *data, const unsigned char *d_orig,
 			if (ds >= 3 && d[0] >= 0xe0 && d[0] <= 0xef) {  /* JPEG_MARKER_APPn */
 				d++;
 				ds--;
-				l = (((unsigned int)d[0]) << 8) | d[1];
+				l = (d[0] << 8) | d[1];
 				if (l > ds)
 					return;
 				d += l;
@@ -920,22 +905,12 @@ exif_data_load_data (ExifData *data, const unsigned char *d_orig,
 		}
 		d++;
 		ds--;
-		len = (((unsigned int)d[0]) << 8) | d[1];
-		if (len > ds) {
-			exif_log (data->priv->log, EXIF_LOG_CODE_CORRUPT_DATA,
-				  "ExifData", _("Read length %d is longer than data length %d."), len, ds);
-			return;
-		}
-		if (len < 2) {
-			exif_log (data->priv->log, EXIF_LOG_CODE_CORRUPT_DATA,
-				  "ExifData", _("APP Tag too short."));
-			return;
-		}
+		len = (d[0] << 8) | d[1];
 		exif_log (data->priv->log, EXIF_LOG_CODE_DEBUG, "ExifData",
 			  "We have to deal with %i byte(s) of EXIF data.",
 			  len);
 		d += 2;
-		ds = len - 2;	/* we do not want the full rest size, but only the size of the tag */
+		ds -= 2;
 	}
 
 	/*
