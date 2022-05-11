@@ -27,7 +27,6 @@ if (defined(ohos_lite)) {  # is on lite Os for ipcamera
       "//third_party/libexif/libexif/exif-mem.c",
       "//third_party/libexif/libexif/exif-mnote-data.c",
       "//third_party/libexif/libexif/exif-tag.c",
-      "//third_party/libexif/libexif/exif-gps-ifd.c",
       "//third_party/libexif/libexif/exif-utils.c",
       "//third_party/libexif/libexif/pentax/exif-mnote-data-pentax.c",
       "//third_party/libexif/libexif/pentax/mnote-pentax-entry.c",
@@ -78,9 +77,6 @@ if (defined(ohos_lite)) {  # is on lite Os for ipcamera
 
   ohos_source_set("exif_static") {
     sources = [
-      "//third_party/libexif/libexif/apple/exif-mnote-data-apple.c",
-      "//third_party/libexif/libexif/apple/mnote-apple-entry.c",
-      "//third_party/libexif/libexif/apple/mnote-apple-tag.c",
       "//third_party/libexif/libexif/canon/exif-mnote-data-canon.c",
       "//third_party/libexif/libexif/canon/mnote-canon-entry.c",
       "//third_party/libexif/libexif/canon/mnote-canon-tag.c",
@@ -89,7 +85,6 @@ if (defined(ohos_lite)) {  # is on lite Os for ipcamera
       "//third_party/libexif/libexif/exif-data.c",
       "//third_party/libexif/libexif/exif-entry.c",
       "//third_party/libexif/libexif/exif-format.c",
-      "//third_party/libexif/libexif/exif-gps-ifd.c",
       "//third_party/libexif/libexif/exif-ifd.c",
       "//third_party/libexif/libexif/exif-loader.c",
       "//third_party/libexif/libexif/exif-log.c",
