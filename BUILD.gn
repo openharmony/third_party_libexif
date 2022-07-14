@@ -118,7 +118,6 @@ if (defined(ohos_lite)) {  # is on lite Os for ipcamera
 
   ohos_shared_library("libexif") {
     deps = [ ":exif_static" ]
-    relative_install_dir = "ndk"
     subsystem_name = "multimedia"
     part_name = "multimedia_image_standard"
   }
