@@ -121,6 +121,6 @@ if (defined(ohos_lite)) {  # is on lite Os for ipcamera
     install_images = [ system_base_dir ]
     relative_install_dir = "platformsdk"
     subsystem_name = "multimedia"
-    part_name = "multimedia_image_standard"
+    part_name = "multimedia_image_framework"
   }
 }
