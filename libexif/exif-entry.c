@@ -1376,7 +1376,9 @@ exif_entry_get_value (ExifEntry *e, char *val, unsigned int maxlen)
 	case EXIF_TAG_FLASH:
 	case EXIF_TAG_SUBJECT_DISTANCE_RANGE:
 	case EXIF_TAG_COLOR_SPACE:
+    /* libexif v0.6.25 support, cause xts failed
 	case EXIF_TAG_COMPOSITE_IMAGE:
+    */
 		CF (e,EXIF_FORMAT_SHORT, val, maxlen)
 		CC (e, 1, val, maxlen)
 		v_short = exif_get_short (e->data, o);
@@ -1785,15 +1787,6 @@ exif_entry_initialize (ExifEntry *e, ExifTag tag)
 		if (!e->data) { clear_entry(e); break; }
 		break;
 
-	/* RATIONAL, 4 components, no default */
-	case EXIF_TAG_LENS_SPECIFICATION:
-		e->components = 4;
-		e->format = EXIF_FORMAT_RATIONAL;
-		e->size = exif_format_get_size (e->format) * e->components;
-		e->data = exif_entry_alloc (e, e->size);
-		if (!e->data) { clear_entry(e); break; }
-		break;
-
 	/* RATIONAL, 3 components, no default */
 	case EXIF_TAG_YCBCR_COEFFICIENTS:
 		e->components = 3;
@@ -1898,11 +1891,6 @@ exif_entry_initialize (ExifEntry *e, ExifTag tag)
 	case EXIF_TAG_MODEL:
 	case EXIF_TAG_SOFTWARE:
 	case EXIF_TAG_ARTIST:
-	case EXIF_TAG_CAMERA_OWNER_NAME:
-	case EXIF_TAG_BODY_SERIAL_NUMBER:
-	case EXIF_TAG_LENS_MAKE:
-	case EXIF_TAG_LENS_MODEL:
-	case EXIF_TAG_LENS_SERIAL_NUMBER:
 		e->components = strlen (_("[None]")) + 1;
 		e->format = EXIF_FORMAT_ASCII;
 		e->size = exif_format_get_size (e->format) * e->components;
