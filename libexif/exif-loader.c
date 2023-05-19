@@ -169,7 +169,7 @@ exif_loader_write (ExifLoader *eld, unsigned char *buf, unsigned int len)
 	unsigned int i;
 
 begin:
-	if (!eld || (len && !buf)) 
+	if (!eld || (len && !buf))
 		return 0;
 
 	switch (eld->state) {

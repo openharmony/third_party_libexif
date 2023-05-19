@@ -23,8 +23,8 @@
  * SPDX-License-Identifier: LGPL-2.0-or-later
  */
 
-#ifndef __EXIF_FORMAT_H__
-#define __EXIF_FORMAT_H__
+#ifndef LIBEXIF_EXIF_FORMAT_H
+#define LIBEXIF_EXIF_FORMAT_H
 
 #ifdef __cplusplus
 extern "C" {
@@ -64,4 +64,4 @@ unsigned char exif_format_get_size (ExifFormat format);
 }
 #endif /* __cplusplus */
 
-#endif /* __EXIF_FORMAT_H__ */
+#endif /* !defined(LIBEXIF_EXIF_FORMAT_H) */

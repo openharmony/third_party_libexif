@@ -22,8 +22,8 @@
  * SPDX-License-Identifier: LGPL-2.0-or-later
  */
 
-#ifndef __EXIF_CONTENT_H__
-#define __EXIF_CONTENT_H__
+#ifndef LIBEXIF_EXIF_CONTENT_H
+#define LIBEXIF_EXIF_CONTENT_H
 
 #ifdef __cplusplus
 extern "C" {
@@ -180,4 +180,4 @@ void exif_content_log   (ExifContent *content, ExifLog *log);
 }
 #endif /* __cplusplus */
 
-#endif /* __EXIF_CONTENT_H__ */
+#endif /* !defined(LIBEXIF_EXIF_CONTENT_H) */
