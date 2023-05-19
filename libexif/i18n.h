@@ -20,8 +20,8 @@
  * SPDX-License-Identifier: LGPL-2.0-or-later
  */
 
-#ifndef __I18N_H__
-#define __I18N_H__
+#ifndef LIBEXIF_I18N_H
+#define LIBEXIF_I18N_H
 
 #include "config.h"
 
@@ -51,4 +51,4 @@
 #  define N_(String) (String)
 #endif
 
-#endif /* __I18N_H__ */
+#endif /* !defined(LIBEXIF_I18N_H) */

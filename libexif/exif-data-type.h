@@ -20,8 +20,8 @@
  * SPDX-License-Identifier: LGPL-2.0-or-later
  */
 
-#ifndef __EXIF_DATA_TYPE_H__
-#define __EXIF_DATA_TYPE_H__
+#ifndef LIBEXIF_EXIF_DATA_TYPE_H
+#define LIBEXIF_EXIF_DATA_TYPE_H
 
 #ifdef __cplusplus
 extern "C" {
@@ -45,4 +45,4 @@ typedef enum {
 }
 #endif /* __cplusplus */
 
-#endif /* __EXIF_TAG_H__ */
+#endif /* !defined(LIBEXIF_EXIF_DATA_TYPE_H) */
