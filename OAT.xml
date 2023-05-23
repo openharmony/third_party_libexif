@@ -73,7 +73,7 @@
             <filefilter name="binaryFileTypePolicyFilter" desc="Filters for binary file policies">
                 <filteritem type="filepath" name=".*" desc="third party"/>
             </filefilter>	
-            <filefilter name="defaultPolicyFilter" desc="Filters for compatibility，license header policies">
+            <filefilter name="defaultPolicyFilter" desc="Filters for compatibility, license header policies">
                 <filteritem type="filename" name="Makefile.am" desc="programmer defined file"/>
                 <filteritem type="filepath" name="po/.*" desc="portable object file"/>
             </filefilter>
