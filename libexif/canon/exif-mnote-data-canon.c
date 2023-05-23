@@ -224,6 +224,13 @@ exif_mnote_data_canon_load (ExifMnoteData *ne,
 	/* Read the number of tags */
 	c = exif_get_short (buf + datao, n->order);
 	datao += 2;
+	/* Just use an arbitrary max tag limit here to avoid needing to much memory or time. There are 24 named tags currently.
+	 * current 2020 camera EOS M6 Mark 2 had 156 entries.
+	 * The format allows specifying the same range of memory as often as it can, so this multiplies quickly. */
+	if (c > 250) {
+		exif_log (ne->log, EXIF_LOG_CODE_CORRUPT_DATA, "ExifMnoteCanon", "Too much tags (%d) in Canon MakerNote", c);
+		return;
+	}
 
 	/* Remove any old entries */
 	exif_mnote_data_canon_clear (n);
@@ -387,10 +394,11 @@ exif_mnote_data_canon_identify (const ExifData *ed, const ExifEntry *e)
 {
 	char value[8];
 
-	(void) e;  /* unused */
 	ExifEntry *em = exif_data_get_entry (ed, EXIF_TAG_MAKE);
 	if (!em) 
 		return 0;
+
+	(void) e;  /* unused */
 	return !strcmp (exif_entry_get_value (em, value, sizeof (value)), "Canon");
 }
 
