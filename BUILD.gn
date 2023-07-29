@@ -131,6 +131,6 @@ if (defined(ohos_lite)) {  # is on lite Os for ipcamera
     install_images = [ system_base_dir ]
     subsystem_name = "multimedia"
     innerapi_tags = [ "chipsetsdk" ]
-    part_name = "multimedia_image_framework"
+    part_name = "libexif"
   }
 }
