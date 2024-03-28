@@ -142,7 +142,8 @@ exif_content_add_entry (ExifContent *c, ExifEntry *entry)
 	if (!c || !c->priv || !entry || entry->parent) return;
 
 	/* One tag can only be added once to an IFD. */
-	if (exif_content_get_entry (c, entry->tag)) {
+
+	if (exif_content_get_entry (c, entry->tag) && entry->tag != EXIF_TAG_MAKER_NOTE) {
 		exif_log (c->priv->log, EXIF_LOG_CODE_DEBUG, "ExifContent",
 			"An attempt has been made to add "
 			"the tag '%s' twice to an IFD. This is against "
@@ -209,6 +210,25 @@ exif_content_get_entry (ExifContent *content, ExifTag tag)
 	for (i = 0; i < content->count; i++)
 		if (content->entries[i]->tag == tag)
 			return (content->entries[i]);
+	return (NULL);
+}
+
+ExifEntry *
+exif_content_get_huawei_makenote_entry (ExifContent *content)
+{
+	if (!content)
+		return (NULL);
+
+	ExifEntry *entry = NULL;
+	for (unsigned int i = 0; i < content->count; i++) {
+		entry = content->entries[i];
+		if (entry->tag == EXIF_TAG_MAKER_NOTE) {
+			if(!memcmp(entry->data, "HUAWEI\0\0", 8)) {
+				return entry;
+			}
+		}
+	}
+
 	return (NULL);
 }
 
