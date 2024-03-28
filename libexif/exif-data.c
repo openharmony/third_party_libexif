@@ -235,7 +235,13 @@ exif_data_load_data_entry (ExifData *data, ExifEntry *entry,
 					       entry->data[3], entry->data[4], entry->data[5],
 					       entry->data[6]);
 		}
-		data->priv->offset_mnote = doff;
+
+		if (!data->priv->offset_mnote) {
+			data->priv->offset_mnote = doff;
+		}
+		if (entry->data && !memcmp(entry->data, "HUAWEI\0\0", 8)) {
+			data->priv->offset_mnote = doff;
+		}
 	}
 	return 1;
 }
@@ -1141,7 +1147,11 @@ static void
 interpret_maker_note(ExifData *data, const unsigned char *d, unsigned int ds)
 {
 	int mnoteid;
-	ExifEntry* e = exif_data_get_entry (data, EXIF_TAG_MAKER_NOTE);
+	ExifEntry* e = exif_content_get_huawei_makenote_entry(data->ifd[EXIF_IFD_EXIF]);
+	if (!e) {
+		e = exif_data_get_entry (data, EXIF_TAG_MAKER_NOTE);
+	}
+
 	if (!e)
 		return;
 	

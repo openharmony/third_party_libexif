@@ -119,6 +119,7 @@ void         exif_content_remove_entry (ExifContent *c, ExifEntry *e);
  * \return #ExifEntry of the tag, or NULL on error
  */
 ExifEntry   *exif_content_get_entry    (ExifContent *content, ExifTag tag);
+ExifEntry   *exif_content_get_huawei_makenote_entry    (ExifContent *content);
 
 /*! Fix the IFD to bring it into specification. Call #exif_entry_fix on
  * each entry in this IFD to fix existing entries, create any new entries
