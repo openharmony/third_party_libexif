@@ -24,6 +24,7 @@
 
 #include <libexif/exif-tag.h>
 #include <libexif/i18n.h>
+#include <stdbool.h>
 
 #include <stdlib.h>
 #include <string.h>
@@ -371,7 +372,9 @@ static const struct TagEntry {
 	{EXIF_TAG_TRANSFER_RANGE, "TransferRange", N_("Transfer Range"), "",
 	 ESL_UNKNOWN},
 	/* Not in EXIF 2.2 */
-	{EXIF_TAG_JPEG_PROC, "JPEGProc", "JPEGProc", "", ESL_UNKNOWN},
+	{EXIF_TAG_JPEG_PROC, "JPEGProc", "JPEGProc", "", ESL_UNKNOWN },
+	/* Same as JPEGPro */
+	{EXIF_TAG_JPEG_PROC, "PhotoMode", "PhotoMode", "", ESL_UNKNOWN},
 	{EXIF_TAG_JPEG_INTERCHANGE_FORMAT, "JPEGInterchangeFormat",
 	 N_("JPEG Interchange Format"),
 	 N_("The offset to the start byte (SOI) of JPEG compressed "
@@ -543,12 +546,9 @@ static const struct TagEntry {
 	 N_("ISO Speed"),
 	 "",
 	 { ESL_NNNN, ESL_NNNN, ESL_OOOO, ESL_NNNN, ESL_NNNN } },
-	{EXIF_TAG_ISO_SPEEDLatitudeYYY, "ISOSpeedLatitudeyyy",
-	 N_("ISO Speed Latitude yyy"),
-	 "",
-	 { ESL_NNNN, ESL_NNNN, ESL_OOOO, ESL_NNNN, ESL_NNNN } },
-	{EXIF_TAG_ISO_SPEEDLatitudeZZZ, "ISOSpeedLatitudezzz",
-	 N_("ISO Speed Latitude zzz"),
+	/* Same as ISO Speed */
+	{EXIF_TAG_ISO_SPEED, "ISOSpeed",
+	 N_("ISO Speed"),
 	 "",
 	 { ESL_NNNN, ESL_NNNN, ESL_OOOO, ESL_NNNN, ESL_NNNN } },
 	{EXIF_TAG_EXIF_VERSION, "ExifVersion", N_("Exif Version"),
@@ -677,7 +677,17 @@ static const struct TagEntry {
 	 N_("A tag used to record fractions of seconds for the "
 	    "<DateTimeOriginal> tag."),
 	 { ESL_NNNN, ESL_NNNN, ESL_OOOO, ESL_NNNN, ESL_NNNN } },
+	{EXIF_TAG_SUB_SEC_TIME_ORIGINAL, "SubsecTimeOriginal",
+	 N_("Sub-second Time (Original)"),
+	 N_("A tag used to record fractions of seconds for the "
+	    "<DateTimeOriginal> tag."),
+	 { ESL_NNNN, ESL_NNNN, ESL_OOOO, ESL_NNNN, ESL_NNNN } },
 	{EXIF_TAG_SUB_SEC_TIME_DIGITIZED, "SubSecTimeDigitized",
+	 N_("Sub-second Time (Digitized)"),
+	 N_("A tag used to record fractions of seconds for the "
+	    "<DateTimeDigitized> tag."),
+	 { ESL_NNNN, ESL_NNNN, ESL_OOOO, ESL_NNNN, ESL_NNNN } },
+	{EXIF_TAG_SUB_SEC_TIME_DIGITIZED, "SubsecTimeDigitized",
 	 N_("Sub-second Time (Digitized)"),
 	 N_("A tag used to record fractions of seconds for the "
 	    "<DateTimeDigitized> tag."),
@@ -961,6 +971,26 @@ static const struct TagEntry {
             "and using the reclaimed space to store the new or expanded "
             "metadata tags."),
 	 { ESL_OOOO, ESL_NNNN, ESL_OOOO, ESL_NNNN, ESL_NNNN } },
+	{EXIF_TAG_ISO_SPEED_LATITUDE_YYY, "ISOSpeedLatitudeyyy",
+	 N_("ISO Speed Latitudeyyy"),
+	 N_("The tag indicate the ISO speed latitude yyy value of the camera or input device that is defined in ISO 12232."),
+	 { ESL_NNNN, ESL_NNNN, ESL_OOOO, ESL_NNNN, ESL_NNNN } },
+	{EXIF_TAG_ISO_SPEED_LATITUDE_ZZZ, "ISOSpeedLatitudezzz",
+	 N_("ISO Speed Latitudezzz"),
+	 N_("The tag indicate the ISO speed latitude zzz value of the camera or input device that is defined in ISO 12232."),
+	 { ESL_NNNN, ESL_NNNN, ESL_OOOO, ESL_NNNN, ESL_NNNN } },
+	{EXIF_TAG_DEFALUT_CROP_SIZE, "DefaultCropSize",
+	 N_("Default Crop Size"),
+	 N_("DefaultCropSize specifies the final image size in raw coordinates, accounting for extra edge pixels."),
+	 { ESL_OOOO, ESL_NNNN, ESL_NNNN, ESL_NNNN, ESL_NNNN } },
+	{EXIF_TAG_DNG_VERSION, "DNGVersion",
+	 N_("DNG Version"),
+	 N_("The DNGVersion tag encodes the four-tier version number for DNG specification compliance."),
+	 { ESL_OOOO, ESL_NNNN, ESL_NNNN, ESL_NNNN, ESL_NNNN } },
+	{EXIF_TAG_OLD_SUBFILE_TYPE, "SubfileType",
+	 N_("Subfile Type"),
+	 N_("This tag indicates horizontal positioning errors in meters."),
+	 { ESL_OOOO, ESL_NNNN, ESL_NNNN, ESL_NNNN, ESL_NNNN } },
 #endif
 	{0, NULL, NULL, NULL, ESL_UNKNOWN}
 };
@@ -1168,15 +1198,42 @@ exif_tag_get_description (ExifTag tag)
 ExifTag 
 exif_tag_from_name (const char *name)
 {
-	unsigned int i;
-	unsigned int result=0;
-
 	if (!name) return 0;
 
+	unsigned int i;
+	unsigned int result=0;
 	for (i = 0; ExifTagTable[i].name; i++)
 		if (!strcmp (ExifTagTable[i].name, name))  {
 		  	result = ExifTagTable[i].tag;
 		  	break;
+		}
+	return result;
+}
+
+ExifIfd
+exif_ifd_from_name(const char* name)
+{
+	unsigned int i;
+	ExifIfd result = EXIF_IFD_0;
+
+	if (!name) return 0;
+
+	for (i = 0; ExifTagTable[i].name; i++)
+		if (!strcmp(ExifTagTable[i].name, name)) {
+			const ExifSupportLevel *esl = &(ExifTagTable[i].esl)[0][0];
+			bool found = false;
+			for (int irow = 0; irow < 5; irow++) {
+				for (int jcol = 0; jcol < 4; jcol++) {
+					if (*(esl + irow * 4 + jcol) == EXIF_SUPPORT_LEVEL_MANDATORY || *(esl + irow * 4 + jcol) == EXIF_SUPPORT_LEVEL_OPTIONAL) {
+						result = (ExifIfd)irow;
+						found = true;
+						break;
+					}
+				}
+				if (found) {
+					break;
+				}
+			}
 		}
 	return result;
 }

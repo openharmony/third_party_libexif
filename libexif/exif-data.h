@@ -106,6 +106,8 @@ ExifData *exif_data_new_from_data (const unsigned char *data,
  */
 void      exif_data_load_data (ExifData *data, const unsigned char *d, 
 			       unsigned int size);
+void      exif_data_load_data_general(ExifData* data, const unsigned char* d,
+				   unsigned int size);
 
 /*! Store raw EXIF data representing the #ExifData structure into a memory
  * buffer. The buffer is allocated by this function and must subsequently be
@@ -119,6 +121,8 @@ void      exif_data_load_data (ExifData *data, const unsigned char *d,
  */
 void      exif_data_save_data (ExifData *data, unsigned char **d,
 			       unsigned int *ds);
+void      exif_data_save_data_general(ExifData* data, unsigned char** d,
+	unsigned int* ds);
 
 void      exif_data_ref   (ExifData *data);
 void      exif_data_unref (ExifData *data);
