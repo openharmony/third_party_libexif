@@ -26,8 +26,20 @@
             "third_party": []
         },
         "build": {
-            "sub_component": [],
-            "inner_kits": [],
+            "sub_component": ["//third_party/libexif:libexif"],
+            "inner_kits": [
+                {
+                    "name": "//third_party/libexif:libexif",
+                    "header": {
+                        "header_files": [
+                            "exif-data.h",
+                            "exif-entry.h",
+                            "exif-tag.h"
+                        ],
+                        "header_base": "${root_gen_dir}/third_party/libexif/"
+                    }
+                }
+            ],
             "test": []
         }
     }
