@@ -34,9 +34,15 @@
                         "header_files": [
                             "exif-data.h",
                             "exif-entry.h",
-                            "exif-tag.h"
+                            "exif-tag.h",
+                            "exif-format.h",
+                            "huawei/exif-mnote-data-huawei.h",
+                            "huawei/mnote-huawei-entry.h",
+                            "huawei/mnote-huawei-tag.h",
+                            "huawei/mnote-huawei-data-type.h"
+
                         ],
-                        "header_base": "${root_gen_dir}/third_party/libexif/"
+                        "header_base": "//third_party/libexif/libexif"
                     }
                 }
             ],
