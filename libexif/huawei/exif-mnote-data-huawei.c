@@ -302,7 +302,7 @@ exif_mnote_data_huawei_load_data (ExifMnoteData *ne, const unsigned char *buf, u
 			*cur_ifd_data_offset = order_offset + exif_get_long (entries[tcount].data, n->order);
 			ExifMnoteDataHuawei* md = (ExifMnoteDataHuawei*)exif_mnote_data_huawei_new(ne->mem);
 
-			if(!md) {
+			if (!md) {
 				exif_log (ne->log, EXIF_LOG_CODE_CORRUPT_DATA,
 				  "ExifMnoteHuawei",
 				  "Invalid zero-length tag size");
@@ -559,11 +559,8 @@ exif_mnote_data_huawei_identify (const ExifData *ed, const ExifEntry *e)
 {
 	int ret = 0;
 
-    if (!e && e->size < sizeof(HUAWEI_HEADER)) return ret;
+	if (!e && e->size < sizeof(HUAWEI_HEADER)) return ret;
 	ret = !memcmp(e->data, HUAWEI_HEADER, 8);
-	if(ret) {
-		return ret;
-	}
 
 	return ret;
 }

@@ -234,10 +234,7 @@ exif_data_load_data_entry (ExifData *data, ExifEntry *entry,
 					       entry->data[6]);
 		}
 
-		if (!data->priv->offset_mnote) {
-			data->priv->offset_mnote = doff;
-		}
-		if (entry->data && !memcmp(entry->data, "HUAWEI\0\0", 8)) {
+		if (!data->priv->offset_mnote || (entry->data && !memcmp(entry->data, "HUAWEI\0\0", 8))) {
 			data->priv->offset_mnote = doff;
 		}
 	}
