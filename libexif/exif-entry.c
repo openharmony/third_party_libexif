@@ -673,7 +673,7 @@ static const struct {
 } list[] = {
 #ifndef NO_VERBOSE_TAG_DATA
   { EXIF_TAG_PLANAR_CONFIGURATION,
-    { N_("Chunky format"), N_("Planar format"), NULL}},
+    { "", N_("Chunky format"), N_("Planar format"), NULL}},
   { EXIF_TAG_SENSING_METHOD,
     { "", N_("Not defined"), N_("One-chip color area sensor"),
       N_("Two-chip color area sensor"), N_("Three-chip color area sensor"),
