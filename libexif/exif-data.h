@@ -120,9 +120,9 @@ void      exif_data_load_data_general(ExifData* data, const unsigned char* d,
  *   data at d, or set to 0 on error
  */
 void      exif_data_save_data (ExifData *data, unsigned char **d,
-			       unsigned int *ds);
+                               unsigned int *ds);
 void      exif_data_save_data_general(ExifData* data, unsigned char** d,
-	unsigned int* ds);
+                                      unsigned int* ds);
 
 void      exif_data_ref   (ExifData *data);
 void      exif_data_unref (ExifData *data);
