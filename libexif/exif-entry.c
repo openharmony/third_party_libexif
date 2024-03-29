@@ -356,6 +356,7 @@ exif_entry_fix (ExifEntry *e)
 		break;
 
 	case EXIF_TAG_USER_COMMENT:
+
 		/* Format needs to be UNDEFINED. */
 		if (e->format != EXIF_FORMAT_UNDEFINED) {
 			exif_entry_log (e, EXIF_LOG_CODE_DEBUG,
@@ -893,11 +894,7 @@ exif_entry_get_value (ExifEntry *e, char *val, unsigned int maxlen)
 
 	switch (e->tag) {
 	case EXIF_TAG_USER_COMMENT:
-	case EXIF_TAG_SPATIAL_FREQUENCY_RESPONSE:
-	case EXIF_TAG_DEVICE_SETTING_DESCRIPTION:
-	case EXIF_TAG_GPS_PROCESSING_METHOD:
-	case EXIF_TAG_GPS_AREA_INFORMATION:
-	case EXIF_TAG_SOURCE_EXPOSURE_TIMES_OF_COMPOSITE_IMAGE:
+
 		/*
 		 * The specification says UNDEFINED, but some
 		 * manufacturers don't care and use ASCII. If this is the
@@ -1486,33 +1483,11 @@ exif_entry_initialize (ExifEntry *e, ExifTag tag)
 	case EXIF_TAG_INTEROPERABILITY_IFD_POINTER:
 	case EXIF_TAG_JPEG_INTERCHANGE_FORMAT_LENGTH:
 	case EXIF_TAG_JPEG_INTERCHANGE_FORMAT:
-	case EXIF_TAG_RECOMMENDED_EXPOSURE_INDEX:
-	case EXIF_TAG_STANDARD_OUTPUT_SENSITIVITY:
-	case EXIF_TAG_ROWS_PER_STRIP:
-	case EXIF_TAG_STRIP_BYTE_COUNTS:
-	case EXIF_TAG_JPEG_PROC:
-	case EXIF_TAG_ISO_SPEED_LATITUDE_YYY:
-	case EXIF_TAG_ISO_SPEED_LATITUDE_ZZZ:
-	case EXIF_TAG_ISO_SPEED:
-	case EXIF_TAG_STRIP_OFFSETS:
 		e->components = 1;
 		e->format = EXIF_FORMAT_LONG;
 		e->size = exif_format_get_size (e->format) * e->components;
 		e->data = exif_entry_alloc (e, e->size);
 		if (!e->data) { clear_entry(e); break; }
-		break;
-
-	/* LONG, 2 components, default 0 0 */
-	case EXIF_TAG_DEFALUT_CROP_SIZE:
-		e->components = 2;
-		e->format = EXIF_FORMAT_LONG;
-		e->size = exif_format_get_size (e->format) * e->components;
-		e->data = exif_entry_alloc (e, e->size);
-		if (!e->data) { clear_entry(e); break; }
-		exif_set_long (e->data, o, 0);
-		exif_set_long (
-			e->data + exif_format_get_size (e->format),
-			o, 0);
 		break;
 
 	/* SHORT, 1 component, no default */
@@ -1528,9 +1503,6 @@ exif_entry_initialize (ExifEntry *e, ExifTag tag)
 	case EXIF_TAG_FLASH:
 	case EXIF_TAG_ISO_SPEED_RATINGS:
 	case EXIF_TAG_SENSITIVITY_TYPE:
-	case EXIF_TAG_NEW_SUBFILE_TYPE:
-	case EXIF_TAG_OLD_SUBFILE_TYPE:
-	case EXIF_TAG_COMPOSITE_IMAGE:
 
 	/* SHORT, 1 component, default 0 */
 	case EXIF_TAG_IMAGE_WIDTH:
@@ -1594,19 +1566,6 @@ exif_entry_initialize (ExifEntry *e, ExifTag tag)
 		exif_set_short (e->data, o, 0xffff);
 		break;
 
-	/* SHORT, 2 components, default 0 0 */
-	case EXIF_TAG_SUBJECT_AREA:
-		e->components = 2;
-		e->format = EXIF_FORMAT_SHORT;
-		e->size = exif_format_get_size(e->format) * e->components;
-		e->data = exif_entry_alloc(e, e->size);
-		if (!e->data) { clear_entry(e); break; }
-		exif_set_short(e->data, o, 0);
-		exif_set_short(
-			e->data + exif_format_get_size(e->format),
-			o, 0);
-		break;
-
 	/* SHORT, 3 components, default 8 8 8 */
 	case EXIF_TAG_BITS_PER_SAMPLE:
 		e->components = 3;
@@ -1623,28 +1582,8 @@ exif_entry_initialize (ExifEntry *e, ExifTag tag)
 			o, 8);
 		break;
 
-	/* SHORT, 4 components, default 0 0 0 1 */
-	case EXIF_TAG_DNG_VERSION:
-		e->components = 4;
-		e->format = EXIF_FORMAT_SHORT;
-		e->size = exif_format_get_size (e->format) * e->components;
-		e->data = exif_entry_alloc (e, e->size);
-		if (!e->data) { clear_entry(e); break; }
-		exif_set_short (e->data, o, 0);
-		exif_set_short (
-			e->data + exif_format_get_size (e->format),
-			o, 0);
-		exif_set_short (
-			e->data + 2 * exif_format_get_size (e->format),
-			o, 0);
-		exif_set_short(
-			e->data + 3 * exif_format_get_size(e->format),
-			o, 1);
-		break;
-
 	/* SHORT, 2 components, default 2 1 */
 	case EXIF_TAG_YCBCR_SUB_SAMPLING:
-	case EXIF_TAG_SOURCE_IMAGE_NUMBER_OF_COMPOSITE_IMAGE:
 		e->components = 2;
 		e->format = EXIF_FORMAT_SHORT;
 		e->size = exif_format_get_size (e->format) * e->components;
@@ -1681,7 +1620,6 @@ exif_entry_initialize (ExifEntry *e, ExifTag tag)
 	case EXIF_TAG_COMPRESSED_BITS_PER_PIXEL:
 	case EXIF_TAG_PRIMARY_CHROMATICITIES:
 	case EXIF_TAG_DIGITAL_ZOOM_RATIO:
-	case EXIF_TAG_GAMMA:
 		e->components = 1;
 		e->format = EXIF_FORMAT_RATIONAL;
 		e->size = exif_format_get_size (e->format) * e->components;
@@ -1708,24 +1646,6 @@ exif_entry_initialize (ExifEntry *e, ExifTag tag)
 		e->format = EXIF_FORMAT_RATIONAL;
 		e->size = exif_format_get_size (e->format) * e->components;
 		e->data = exif_entry_alloc (e, e->size);
-		if (!e->data) { clear_entry(e); break; }
-		break;
-
-	/* RATIONAL, 3 components, no default */
-	case EXIF_TAG_YCBCR_COEFFICIENTS:
-		e->components = 3;
-		e->format = EXIF_FORMAT_RATIONAL;
-		e->size = exif_format_get_size(e->format) * e->components;
-		e->data = exif_entry_alloc(e, e->size);
-		if (!e->data) { clear_entry(e); break; }
-		break;
-
-	/* RATIONAL, 4 components, no default */
-	case EXIF_TAG_LENS_SPECIFICATION:
-		e->components = 4;
-		e->format = EXIF_FORMAT_RATIONAL;
-		e->size = exif_format_get_size(e->format) * e->components;
-		e->data = exif_entry_alloc(e, e->size);
 		if (!e->data) { clear_entry(e); break; }
 		break;
 
@@ -1792,17 +1712,6 @@ exif_entry_initialize (ExifEntry *e, ExifTag tag)
 	case EXIF_TAG_SUB_SEC_TIME:
 	case EXIF_TAG_SUB_SEC_TIME_ORIGINAL:
 	case EXIF_TAG_SUB_SEC_TIME_DIGITIZED:
-	case EXIF_TAG_IMAGE_UNIQUE_ID:
-	case EXIF_TAG_RELATED_SOUND_FILE:
-	case EXIF_TAG_LENS_MAKE:
-	case EXIF_TAG_LENS_MODEL:
-	case EXIF_TAG_LENS_SERIAL_NUMBER:
-	case EXIF_TAG_OFFSET_TIME_DIGITIZED:
-	case EXIF_TAG_OFFSET_TIME_ORIGINAL:
-	case EXIF_TAG_OFFSET_TIME:
-	case EXIF_TAG_CAMERA_OWNER_NAME:
-	case EXIF_TAG_BODY_SERIAL_NUMBER:
-	case EXIF_TAG_SPECTRAL_SENSITIVITY:
 		e->components = 0;
 		e->format = EXIF_FORMAT_ASCII;
 		e->size = 0;
@@ -1890,7 +1799,6 @@ exif_entry_initialize (ExifEntry *e, ExifTag tag)
 	/* Use this if the tag is otherwise unsupported */
 	case EXIF_TAG_MAKER_NOTE:
 	case EXIF_TAG_USER_COMMENT:
-	case EXIF_TAG_SOURCE_EXPOSURE_TIMES_OF_COMPOSITE_IMAGE:
 	default:
 		e->components = 0;
 		e->format = EXIF_FORMAT_UNDEFINED;
