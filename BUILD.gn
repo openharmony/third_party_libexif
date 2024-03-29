@@ -14,7 +14,6 @@ if (defined(ohos_lite)) {  # is on lite Os for ipcamera
       "//third_party/libexif/libexif/fuji",
       "//third_party/libexif/libexif/apple",
       "//third_party/libexif/contrib/watcom",
-      "//third_party/libexif/libexif/huawei",
     ]
 
     libexif_source = [
@@ -49,10 +48,6 @@ if (defined(ohos_lite)) {  # is on lite Os for ipcamera
       "//third_party/libexif/libexif/apple/exif-mnote-data-apple.c",
       "//third_party/libexif/libexif/apple/mnote-apple-entry.c",
       "//third_party/libexif/libexif/apple/mnote-apple-tag.c",
-      "//third_party/libexif/libexif/huawei/exif-mnote-data-huawei.c",
-      "//third_party/libexif/libexif/huawei/mnote-huawei-data-type.c",
-      "//third_party/libexif/libexif/huawei/mnote-huawei-entry.c",
-      "//third_party/libexif/libexif/huawei/mnote-huawei-tag.c",
     ]
     cflags = [
       "-DGETTEXT_PACKAGE=\"libexif-12\"",
@@ -109,10 +104,6 @@ if (defined(ohos_lite)) {  # is on lite Os for ipcamera
       "//third_party/libexif/libexif/fuji/exif-mnote-data-fuji.c",
       "//third_party/libexif/libexif/fuji/mnote-fuji-entry.c",
       "//third_party/libexif/libexif/fuji/mnote-fuji-tag.c",
-      "//third_party/libexif/libexif/huawei/exif-mnote-data-huawei.c",
-      "//third_party/libexif/libexif/huawei/mnote-huawei-data-type.c",
-      "//third_party/libexif/libexif/huawei/mnote-huawei-entry.c",
-      "//third_party/libexif/libexif/huawei/mnote-huawei-tag.c",
       "//third_party/libexif/libexif/olympus/exif-mnote-data-olympus.c",
       "//third_party/libexif/libexif/olympus/mnote-olympus-entry.c",
       "//third_party/libexif/libexif/olympus/mnote-olympus-tag.c",
@@ -130,7 +121,6 @@ if (defined(ohos_lite)) {  # is on lite Os for ipcamera
       "//third_party/libexif/libexif/fuji",
       "//third_party/libexif/libexif/apple",
       "//third_party/libexif/contrib/watcom",
-      "//third_party/libexif/libexif/huawei",
     ]
 
     configs = [ ":build_private_config" ]

@@ -35,7 +35,6 @@
 #include <libexif/fuji/exif-mnote-data-fuji.h>
 #include <libexif/olympus/exif-mnote-data-olympus.h>
 #include <libexif/pentax/exif-mnote-data-pentax.h>
-#include <libexif/huawei/exif-mnote-data-huawei.h>
 
 #include <math.h>
 #include <stdlib.h>
@@ -48,8 +47,6 @@
 #define JPEG_MARKER_APP0 0xe0
 #undef JPEG_MARKER_APP1
 #define JPEG_MARKER_APP1 0xe1
-#undef JPEG_HEADER_LEN
-#define JPEG_HEADER_LEN 6
 
 #define CHECKOVERFLOW(offset,datasize,structsize) (( offset >= datasize) || (structsize > datasize) || (offset > datasize - structsize ))
 
@@ -325,94 +322,6 @@ exif_data_save_data_entry (ExifData *data, ExifEntry *e,
 }
 
 static void
-exif_data_save_data_entry_general (ExifData *data, ExifEntry *e,
-								   unsigned char **d, unsigned int *ds,
-								   unsigned int offset)
-{
-	unsigned int doff, s;
-	unsigned int ts;
-
-	if (!data || !data->priv)
-		return;
-
-	/*
-	 * Each entry is 12 bytes long. The memory for the entry has
-	 * already been allocated.
-	 */
-	exif_set_short(*d + 6 - JPEG_HEADER_LEN + offset + 0,
-		data->priv->order, (ExifShort)e->tag);
-	exif_set_short(*d + 6 - JPEG_HEADER_LEN + offset + 2,
-		data->priv->order, (ExifShort)e->format);
-
-	if (!(data->priv->options & EXIF_DATA_OPTION_DONT_CHANGE_MAKER_NOTE)) {
-		/* If this is the maker note tag, update it. */
-		if ((e->tag == EXIF_TAG_MAKER_NOTE) && data->priv->md) {
-			/* TODO: this is using the wrong ExifMem to free e->data */
-			exif_mem_free(data->priv->mem, e->data);
-			e->data = NULL;
-			e->size = 0;
-			exif_mnote_data_set_offset(data->priv->md, *ds - 6 + JPEG_HEADER_LEN);
-			exif_mnote_data_save(data->priv->md, &e->data, &e->size);
-			e->components = e->size;
-			if (exif_format_get_size(e->format) != 1) {
-				/* e->format is taken from input code,
-				 * but we need to make sure it is a 1 byte
-				 * entity due to the multiplication below. */
-				e->format = EXIF_FORMAT_UNDEFINED;
-			}
-		}
-	}
-
-	exif_set_long(*d + 6 - JPEG_HEADER_LEN + offset + 4,
-		data->priv->order, e->components);
-
-	/*
-	 * Size? If bigger than 4 bytes, the actual data is not in
-	 * the entry but somewhere else.
-	 */
-	s = exif_format_get_size(e->format) * e->components;
-	if (s > 4) {
-		unsigned char* t;
-		doff = *ds - 6 + JPEG_HEADER_LEN;
-		ts = *ds + s;
-
-		/*
-		 * According to the TIFF specification,
-		 * the offset must be an even number. If we need to introduce
-		 * a padding byte, we set it to 0.
-		 */
-		if (s & 1)
-			ts++;
-		t = exif_mem_realloc(data->priv->mem, *d, ts);
-		if (!t) {
-			EXIF_LOG_NO_MEMORY(data->priv->log, "ExifData", ts);
-			return;
-		}
-		*d = t;
-		*ds = ts;
-		exif_set_long(*d + 6 - JPEG_HEADER_LEN + offset + 8, data->priv->order, doff);
-		if (s & 1)
-			*(*d + *ds - 1) = '\0';
-
-	}
-	else
-		doff = offset + 8;
-
-	/* Write the data. Fill unneeded bytes with 0. Do not crash with
-	 * e->data is NULL */
-	if (e->data) {
-		unsigned int len = s;
-		if (e->size < s) len = e->size;
-		memcpy(*d + 6 - JPEG_HEADER_LEN + doff, e->data, len);
-	}
-	else {
-		memset(*d + 6 - JPEG_HEADER_LEN + doff, 0, s);
-	}
-	if (s < 4)
-		memset(*d + 6 - JPEG_HEADER_LEN + doff + s, 0, (4 - s));
-}
-
-static void
 exif_data_load_data_thumbnail (ExifData *data, const unsigned char *d,
 			       unsigned int ds, ExifLong o, ExifLong s)
 {
@@ -466,47 +375,6 @@ level_cost(unsigned int n)
 
 	/* Adding 0.1 protects against the case where n==1 */
 	return ceil(log(n + 0.1)/log_1_1);
-}
-
-static void
-load_thumbnail_entry (ExifData *data, ExifTag tag, ExifIfd ifd,
-					  const unsigned char *d,
-					  unsigned int ds, unsigned int offset, unsigned i)
-{
-	/*
-		* If we don't know the tag, don't fail. It could be that new
-		* versions of the standard have defined additional tags. Note that
-		* 0 is a valid tag in the GPS IFD.
-		*/
-	if (!exif_tag_get_name_in_ifd (tag, ifd)) {
-
-		/*
-			* Special case: Tag and format 0. That's against specification
-			* (at least up to 2.2). But Photoshop writes it anyways.
-			*/
-		if (!memcmp (d + offset + 12 * i, "\0\0\0\0", 4)) {
-			exif_log (data->priv->log, EXIF_LOG_CODE_DEBUG, "ExifData",
-					"Skipping empty entry at position %u in '%s'.", i,
-					exif_ifd_get_name (ifd));
-			return;
-		}
-		exif_log (data->priv->log, EXIF_LOG_CODE_DEBUG, "ExifData",
-				"Unknown tag 0x%04x (entry %u in '%s'). Please report this tag "
-				"to <libexif-devel@lists.sourceforge.net>.", tag, i,
-				exif_ifd_get_name (ifd));
-		if (data->priv->options & EXIF_DATA_OPTION_IGNORE_UNKNOWN_TAGS)
-			return;
-	}
-	ExifEntry *entry = exif_entry_new_mem (data->priv->mem);
-	if (!entry) {
-			exif_log (data->priv->log, EXIF_LOG_CODE_NO_MEMORY, "ExifData",
-									"Could not allocate memory");
-			return;
-	}
-	if (exif_data_load_data_entry (data, entry, d, ds,
-					offset + 12 * i))
-		exif_content_add_entry (data->ifd[ifd], entry);
-	exif_entry_unref (entry);
 }
 
 /*! Load data for an IFD.
@@ -616,7 +484,6 @@ exif_data_load_data_content (ExifData *data, ExifIfd ifd,
 					exif_data_load_data_thumbnail (data, d,
 								       ds, thumbnail_offset,
 								       thumbnail_length);
-				load_thumbnail_entry(data, tag, ifd, d, ds, offset, i);
 				break;
 			case EXIF_TAG_JPEG_INTERCHANGE_FORMAT_LENGTH:
 				thumbnail_length = o;
@@ -624,13 +491,13 @@ exif_data_load_data_content (ExifData *data, ExifIfd ifd,
 					exif_data_load_data_thumbnail (data, d,
 								       ds, thumbnail_offset,
 								       thumbnail_length);
-				load_thumbnail_entry(data, tag, ifd, d, ds, offset, i);
 				break;
 			default:
 				return;
 			}
 			break;
 		default:
+
 			/*
 			 * If we don't know the tag, don't fail. It could be that new 
 			 * versions of the standard have defined additional tags. Note that
@@ -905,220 +772,6 @@ exif_data_save_data_content (ExifData *data, ExifContent *ifd,
 		exif_set_long (*d + 6 + offset, data->priv->order, 0);
 }
 
-static void
-exif_data_save_data_content_general (ExifData* data, ExifContent* ifd,
-									 unsigned char** d, unsigned int* ds,
-									 unsigned int offset)
-{
-	unsigned int j, n_ptr = 0, n_thumb = 0;
-	ExifIfd i;
-	unsigned char* t;
-	unsigned int ts;
-
-	if (!data || !data->priv || !ifd || !d || !ds)
-		return;
-
-	for (i = 0; i < EXIF_IFD_COUNT; i++)
-		if (ifd == data->ifd[i])
-			break;
-	if (i == EXIF_IFD_COUNT)
-		return;	/* error */
-
-	/*
-	 * Check if we need some extra entries for pointers or the thumbnail.
-	 */
-	switch (i) {
-	case EXIF_IFD_0:
-
-		/*
-		 * The pointer to IFD_EXIF is in IFD_0. The pointer to
-		 * IFD_INTEROPERABILITY is in IFD_EXIF.
-		 */
-		if (data->ifd[EXIF_IFD_EXIF]->count ||
-			data->ifd[EXIF_IFD_INTEROPERABILITY]->count)
-			n_ptr++;
-
-		/* The pointer to IFD_GPS is in IFD_0. */
-		if (data->ifd[EXIF_IFD_GPS]->count)
-			n_ptr++;
-
-		break;
-	case EXIF_IFD_1:
-		if (data->size)
-			n_thumb = 2;
-		break;
-	case EXIF_IFD_EXIF:
-		if (data->ifd[EXIF_IFD_INTEROPERABILITY]->count)
-			n_ptr++;
-	default:
-		break;
-	}
-
-	/*
-	 * Allocate enough memory for all entries
-	 * and the number of entries.
-	 */
-	ts = *ds + (2 + (ifd->count + n_ptr + n_thumb) * 12 + 4);
-	t = exif_mem_realloc(data->priv->mem, *d, ts);
-	if (!t) {
-		EXIF_LOG_NO_MEMORY(data->priv->log, "ExifData", ts);
-		return;
-	}
-	*d = t;
-	*ds = ts;
-
-	/* Save the number of entries */
-	exif_set_short(*d + 6 - JPEG_HEADER_LEN + offset, data->priv->order,
-		(ExifShort)(ifd->count + n_ptr + n_thumb));
-	offset += 2;
-
-	/*
-	 * Save each entry. Make sure that no memcpys from NULL pointers are
-	 * performed
-	 */
-	exif_log(data->priv->log, EXIF_LOG_CODE_DEBUG, "ExifData",
-		"Saving %i entries (IFD '%s', offset: %i)...",
-		ifd->count, exif_ifd_get_name(i), offset);
-	printf("current ifd->count %u\n", ifd->count);
-	for (j = 0; j < ifd->count; j++) {
-		if (ifd->entries[j]) {
-			exif_data_save_data_entry_general(data, ifd->entries[j], d, ds,
-				offset + 12 * j);
-		}
-	}
-
-	offset += 12 * ifd->count;
-
-	/* Now save special entries. */
-	switch (i) {
-	case EXIF_IFD_0:
-
-		/*
-		 * The pointer to IFD_EXIF is in IFD_0.
-		 * However, the pointer to IFD_INTEROPERABILITY is in IFD_EXIF,
-		 * therefore, if IFD_INTEROPERABILITY is not empty, we need
-		 * IFD_EXIF even if latter is empty.
-		 */
-		if (data->ifd[EXIF_IFD_EXIF]->count ||
-			data->ifd[EXIF_IFD_INTEROPERABILITY]->count) {
-			exif_set_short(*d + 6 - JPEG_HEADER_LEN + offset + 0, data->priv->order,
-				EXIF_TAG_EXIF_IFD_POINTER);
-			exif_set_short(*d + 6 - JPEG_HEADER_LEN + offset + 2, data->priv->order,
-				EXIF_FORMAT_LONG);
-			exif_set_long(*d + 6 - JPEG_HEADER_LEN + offset + 4, data->priv->order,
-				1);
-			exif_set_long(*d + 6 - JPEG_HEADER_LEN + offset + 8, data->priv->order,
-				*ds - 6 + JPEG_HEADER_LEN);
-			exif_data_save_data_content_general(data,
-				data->ifd[EXIF_IFD_EXIF], d, ds, *ds - 6 + JPEG_HEADER_LEN);
-			offset += 12;
-		}
-
-		/* The pointer to IFD_GPS is in IFD_0, too. */
-		if (data->ifd[EXIF_IFD_GPS]->count) {
-			exif_set_short(*d + 6 - JPEG_HEADER_LEN + offset + 0, data->priv->order,
-				EXIF_TAG_GPS_INFO_IFD_POINTER);
-			exif_set_short(*d + 6 - JPEG_HEADER_LEN + offset + 2, data->priv->order,
-				EXIF_FORMAT_LONG);
-			exif_set_long(*d + 6 - JPEG_HEADER_LEN + offset + 4, data->priv->order,
-				1);
-			exif_set_long(*d + 6 - JPEG_HEADER_LEN + offset + 8, data->priv->order,
-				*ds - 6 + JPEG_HEADER_LEN);
-			exif_data_save_data_content_general(data,
-				data->ifd[EXIF_IFD_GPS], d, ds, *ds - 6 + JPEG_HEADER_LEN);
-			offset += 12;
-		}
-
-		break;
-	case EXIF_IFD_EXIF:
-
-		/*
-		 * The pointer to IFD_INTEROPERABILITY is in IFD_EXIF.
-		 * See note above.
-		 */
-		if (data->ifd[EXIF_IFD_INTEROPERABILITY]->count) {
-			exif_set_short(*d + 6 - JPEG_HEADER_LEN + offset + 0, data->priv->order,
-				EXIF_TAG_INTEROPERABILITY_IFD_POINTER);
-			exif_set_short(*d + 6 - JPEG_HEADER_LEN + offset + 2, data->priv->order,
-				EXIF_FORMAT_LONG);
-			exif_set_long(*d + 6 - JPEG_HEADER_LEN + offset + 4, data->priv->order,
-				1);
-			exif_set_long(*d + 6 - JPEG_HEADER_LEN + offset + 8, data->priv->order,
-				*ds - 6 + JPEG_HEADER_LEN);
-			exif_data_save_data_content_general(data,
-				data->ifd[EXIF_IFD_INTEROPERABILITY], d, ds,
-				*ds - 6 + JPEG_HEADER_LEN);
-			offset += 12;
-		}
-
-		break;
-	case EXIF_IFD_1:
-
-		/*
-		 * Information about the thumbnail (if any) is saved in
-		 * IFD_1.
-		 */
-		if (data->size) {
-
-			/* EXIF_TAG_JPEG_INTERCHANGE_FORMAT */
-			exif_set_short(*d + 6 - JPEG_HEADER_LEN + offset + 0, data->priv->order,
-				EXIF_TAG_JPEG_INTERCHANGE_FORMAT);
-			exif_set_short(*d + 6 - JPEG_HEADER_LEN + offset + 2, data->priv->order,
-				EXIF_FORMAT_LONG);
-			exif_set_long(*d + 6 - JPEG_HEADER_LEN + offset + 4, data->priv->order,
-				1);
-			exif_set_long(*d + 6 - JPEG_HEADER_LEN + offset + 8, data->priv->order,
-				*ds - 6 + JPEG_HEADER_LEN);
-			ts = *ds + data->size;
-			t = exif_mem_realloc(data->priv->mem, *d, ts);
-			if (!t) {
-				EXIF_LOG_NO_MEMORY(data->priv->log, "ExifData",
-					ts);
-				return;
-			}
-			*d = t;
-			*ds = ts;
-			memcpy(*d + *ds - data->size, data->data, data->size);
-			offset += 12;
-
-			/* EXIF_TAG_JPEG_INTERCHANGE_FORMAT_LENGTH */
-			exif_set_short(*d + 6 - JPEG_HEADER_LEN + offset + 0, data->priv->order,
-				EXIF_TAG_JPEG_INTERCHANGE_FORMAT_LENGTH);
-			exif_set_short(*d + 6 - JPEG_HEADER_LEN + offset + 2, data->priv->order,
-				EXIF_FORMAT_LONG);
-			exif_set_long(*d + 6 - JPEG_HEADER_LEN + offset + 4, data->priv->order,
-				1);
-			exif_set_long(*d + 6 - JPEG_HEADER_LEN + offset + 8, data->priv->order,
-				data->size);
-			offset += 12;
-		}
-
-		break;
-	default:
-		break;
-	}
-
-	/* Sort the directory according to TIFF specification */
-	qsort(*d + 6 - JPEG_HEADER_LEN + offset - (ifd->count + n_ptr + n_thumb) * 12,
-		(ifd->count + n_ptr + n_thumb), 12,
-		(data->priv->order == EXIF_BYTE_ORDER_INTEL) ? cmp_func_intel : cmp_func_motorola);
-
-	/* Correctly terminate the directory */
-	if (i == EXIF_IFD_0 && (data->ifd[EXIF_IFD_1]->count ||
-		data->size)) {
-
-		/*
-		 * We are saving IFD 0. Tell where IFD 1 starts and save
-		 * IFD 1.
-		 */
-		exif_set_long(*d + 6 - JPEG_HEADER_LEN + offset, data->priv->order, *ds - 6 + JPEG_HEADER_LEN);
-		exif_data_save_data_content_general(data, data->ifd[EXIF_IFD_1], d, ds,
-			*ds - 6 + JPEG_HEADER_LEN);
-	}
-	else
-		exif_set_long(*d + 6 - JPEG_HEADER_LEN + offset, data->priv->order, 0);
-}
-
 typedef enum {
 	EXIF_DATA_TYPE_MAKER_NOTE_NONE		= 0,
 	EXIF_DATA_TYPE_MAKER_NOTE_CANON		= 1,
@@ -1168,10 +821,6 @@ interpret_maker_note(ExifData *data, const unsigned char *d, unsigned int ds)
 		exif_log (data->priv->log, EXIF_LOG_CODE_DEBUG,
 			"ExifData", "Apple MakerNote variant type %d", mnoteid);
 		data->priv->md = exif_mnote_data_apple_new (data->priv->mem);
-	} else if ((mnoteid = exif_mnote_data_huawei_identify (data, e)) != 0) {
-		exif_log (data->priv->log, EXIF_LOG_CODE_DEBUG,
-			"ExifData", "Huawei MakerNote variant type %d", mnoteid);
-		data->priv->md = exif_mnote_data_huawei_new (data->priv->mem);
 	}
 
 	/* 
@@ -1378,94 +1027,6 @@ exif_data_load_data (ExifData *data, const unsigned char *d_orig,
 }
 
 void
-exif_data_load_data_general (ExifData* data, const unsigned char* d_orig,
-							 unsigned int ds)
-{
-	ExifLong offset;
-	ExifShort n;
-	const unsigned char* d = d_orig;
-	unsigned int fullds;
-
-	if (!data || !data->priv || !d || !ds)
-		return;
-
-	exif_log(data->priv->log, EXIF_LOG_CODE_DEBUG, "ExifData",
-		"Parsing %i byte(s) EXIF data...\n", ds);
-
-	/* Sanity check the data length */
-	if (ds < 14)
-		return;
-
-	/* The JPEG APP1 section can be no longer than 64 KiB (including a
-	   16-bit length), so cap the data length to protect against overflow
-	   in future offset calculations */
-	fullds = ds;
-	if (ds > 0xfffe)
-		ds = 0xfffe;
-
-	/* Byte order (offset 6, length 2) */
-	if (!memcmp(d + 6 - 6, "II", 2))
-		data->priv->order = EXIF_BYTE_ORDER_INTEL;
-	else if (!memcmp(d + 6 - 6, "MM", 2))
-		data->priv->order = EXIF_BYTE_ORDER_MOTOROLA;
-	else {
-		exif_log(data->priv->log, EXIF_LOG_CODE_CORRUPT_DATA,
-			"ExifData", _("Unknown encoding."));
-		return;
-	}
-
-	/* Fixed value */
-	if (exif_get_short(d + 8 - 6, data->priv->order) != 0x002a)
-		return;
-
-	/* IFD 0 offset */
-	offset = exif_get_long(d + 10 - 6, data->priv->order);
-	exif_log(data->priv->log, EXIF_LOG_CODE_DEBUG, "ExifData",
-		"IFD 0 at %i.", (int)offset);
-
-	/* ds is restricted to 16 bit above, so offset is restricted too, and offset+8 should not overflow. */
-	// compare offset and buffer size
-	if (offset > ds || offset + 6 - 6 + 2 > ds)
-		return;
-
-	/* Parse the actual exif data (usually offset 14 from start) */
-	exif_data_load_data_content(data, EXIF_IFD_0, d + 6 - 6, ds - 6 + 6, offset, 0);
-
-	/* IFD 1 offset */
-	n = exif_get_short(d + 6 - 6 + offset, data->priv->order);
-	/* offset < 2<<16, n is 16 bit at most, so this op will not overflow */
-	if (offset + 6 - 6 + 2 + 12 * n + 4 > ds)
-		return;
-
-	offset = exif_get_long(d + 6 - 6 + offset + 2 + 12 * n, data->priv->order);
-	if (offset) {
-		exif_log(data->priv->log, EXIF_LOG_CODE_DEBUG, "ExifData",
-			"IFD 1 at %i.", (int)offset);
-
-		/* Sanity check. ds is ensured to be above 6 above, offset is 16bit */
-		if (offset > ds - 6 + 6) {
-			exif_log(data->priv->log, EXIF_LOG_CODE_CORRUPT_DATA,
-				"ExifData", "Bogus offset of IFD1.");
-		}
-		else {
-			exif_data_load_data_content(data, EXIF_IFD_1, d + 6 - 6, ds - 6 + 6, offset, 0);
-		}
-	}
-
-	/*
-	 * If we got an EXIF_TAG_MAKER_NOTE, try to interpret it. Some
-	 * cameras use pointers in the maker note tag that point to the
-	 * space between IFDs. Here is the only place where we have access
-	 * to that data.
-	 */
-	interpret_maker_note(data, d, fullds);
-
-	/* Fixup tags if requested */
-	if (data->priv->options & EXIF_DATA_OPTION_FOLLOW_SPECIFICATION)
-		exif_data_fix(data);
-}
-
-void
 exif_data_save_data (ExifData *data, unsigned char **d, unsigned int *ds)
 {
 	if (ds)
@@ -1508,50 +1069,6 @@ exif_data_save_data (ExifData *data, unsigned char **d, unsigned int *ds)
 				     *ds - 6);
 	exif_log (data->priv->log, EXIF_LOG_CODE_DEBUG, "ExifData",
 		  "Saved %i byte(s) EXIF data.", *ds);
-}
-
-void
-exif_data_save_data_general(ExifData* data, unsigned char** d, unsigned int* ds)
-{
-	if (ds)
-		*ds = 0;	/* This means something went wrong */
-
-	if (!data || !d || !ds)
-		return;
-
-	/* Header 4D 4D 00 2A 00 00 00 08*/
-	*ds = 8;
-	*d = exif_data_alloc(data, *ds);
-	if (!*d) {
-		*ds = 0;
-		return;
-	}
-
-	/* Order (offset 6) */
-	if (data->priv->order == EXIF_BYTE_ORDER_INTEL) {
-		memcpy(*d + 6 - 6, "II", 2);
-	}
-	else {
-		memcpy(*d + 6 - 6, "MM", 2);
-	}
-
-	/* Fixed value (2 bytes, offset 8) */
-	exif_set_short(*d + 8 - 6, data->priv->order, 0x002a);
-
-	/*
-	 * IFD 0 offset (4 bytes, offset 10).
-	 * We will start 8 bytes after the
-	 * EXIF header (2 bytes for order, another 2 for the test, and
-	 * 4 bytes for the IFD 0 offset make 8 bytes together).
-	 */
-	exif_set_long(*d + 10 - 6, data->priv->order, 8);
-	/* Now save IFD 0. IFD 1 will be saved automatically. */
-	exif_log(data->priv->log, EXIF_LOG_CODE_DEBUG, "ExifData",
-		"Saving IFDs...");
-	exif_data_save_data_content_general(data, data->ifd[EXIF_IFD_0], d, ds,
-		*ds);
-	exif_log(data->priv->log, EXIF_LOG_CODE_DEBUG, "ExifData",
-		"Saved %i byte(s) EXIF data.", *ds);
 }
 
 ExifData *
