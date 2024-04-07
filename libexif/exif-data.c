@@ -371,7 +371,7 @@ exif_data_save_data_entry_general (ExifData *data, ExifEntry *e,
 					e->format = EXIF_FORMAT_UNDEFINED;
 				}
 			}
-		}while(0);
+		} while(0);
 	}
 
 	exif_set_long(*d + 6 - JPEG_HEADER_LEN + offset + 4,

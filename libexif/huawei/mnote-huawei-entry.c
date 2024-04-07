@@ -14,6 +14,9 @@
  */
 
 #include "config.h"
+#include "exif-mnote-data-huawei.h"
+#include "mnote-huawei-entry.h"
+#include "mnote-huawei-tag.h"
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -23,11 +26,6 @@
 #include <libexif/exif-format.h>
 #include <libexif/exif-utils.h>
 #include <libexif/i18n.h>
-
-#include "mnote-huawei-tag.h"
-#include "mnote-huawei-entry.h"
-#include "exif-mnote-data-huawei.h"
-
 
 char *
 mnote_huawei_entry_get_value(MnoteHuaweiEntry *entry, char *v, unsigned int maxlen) 
@@ -57,7 +55,7 @@ mnote_huawei_entry_get_value(MnoteHuaweiEntry *entry, char *v, unsigned int maxl
 }
 
 int
-mnote_huawei_entry_set_value(MnoteHuaweiEntry *entry, const char *v, int strlen) 
+mnote_huawei_entry_set_value(MnoteHuaweiEntry *entry, const char *v, int strlen)
 {
     unsigned char data[1024] = {0};
     int increment = 0;
@@ -97,12 +95,12 @@ mnote_huawei_entry_set_value(MnoteHuaweiEntry *entry, const char *v, int strlen)
     token = strtok(pv, " ");
     for (;token && components_size < sizeof(data);) {
       int value = atoi(token);
-      int offset = increment*components;
-      if (increment == 1) { 
+      int offset = increment * components;
+      if (increment == 1) {
         if (value > 0xff || value < 0) {
           ret = -1;
           goto FAILED;
-        }       
+        }
         *(data+offset) = value;
       } else {
          exif_set_slong((data+offset), entry->order, value);
