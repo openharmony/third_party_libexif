@@ -14,20 +14,47 @@
  */
 
 #include <config.h>
+#include <stdlib.h>
+#include <libexif/i18n.h>
 #include "mnote-huawei-tag.h"
 
-#include <stdlib.h>
+typedef struct _MnoteHuaweiTable		MnoteHuaweiTable;
 
-#include <libexif/i18n.h>
-
-
-static const struct {
+struct _MnoteHuaweiTable {
 	MnoteHuaweiTag tag;
 	const char *name;
 	const char *title;
 	const char *description;
 	MnoteHuaweiTagType TagType;
-} table[] = {
+};
+
+static const MnoteHuaweiTable huawei_table[] = {
+	{MNOTE_HUAWEI_CAPTURE_MODE, "HwMnoteCaptureMode", N_("Capture Mode"), "CaptureMode"},
+	{MNOTE_HUAWEI_BURST_NUMBER, "HwMnoteBurstNumber", N_("Burst Number"), "BurstNumber"},
+	{MNOTE_HUAWEI_FRONT_CAMERA, "HwMnoteFrontCamera", N_("Front Camera"), "FrontCamera"},
+	{MNOTE_HUAWEI_ROLL_ANGLE, "HwMnoteRollAngle", N_("Roll Angle"), "RollAngle"},
+	{MNOTE_HUAWEI_PITCH_ANGLE, "HwMnotePitchAngle", N_("Pitch Angle"), "PitchAngle"},
+	{MNOTE_HUAWEI_PHYSICAL_APERTURE, "HwMnotePhysicalAperture", N_("Physical Aperture"), "PhysicalAperture"},
+	{MNOTE_HUAWEI_FOCUS_MODE, "HwMnoteFocusMode", N_("Focus Mode"), "FocusMode"},
+
+	{0, "HwUnknow", N_("Unknow Tag"), "UnknowTag"},
+};
+
+static const MnoteHuaweiTable huawei_face_table[] = {
+	{MNOTE_HUAWEI_FACE_INFO, "HwMnoteFacePointer", N_("Face Info"), "FaceInfo", MNOTE_HUAWEI_TAG_TYPE_IFD},
+	{MNOTE_HUAWEI_FACE_VERSION, "HwMnoteFaceVersion", N_("Face Version"), "FaceVersion"},
+	{MNOTE_HUAWEI_FACE_COUNT, "HwMnoteFaceCount", N_("Count"), "Count"},
+	{MNOTE_HUAWEI_FACE_CONF, "HwMnoteFaceConf", N_("Conf"), "Conf"},
+	{MNOTE_HUAWEI_FACE_SMILE_SCORE, "HwMnoteFaceSmileScore", N_("Smile Score"), "SmileScore"},
+	{MNOTE_HUAWEI_FACE_RECT, "HwMnoteFaceRect", N_("Rect"), "Rect"},
+	{MNOTE_HUAWEI_FACE_LEYE_CENTER, "HwMnoteFaceLeyeCenter", N_("LeyeCenter"), "LeyeCenter"},
+	{MNOTE_HUAWEI_FACE_REYE_CENTER, "HwMnoteFaceReyeCenter", N_("Reye Center"), "ReyeCenter"},
+	{MNOTE_HUAWEI_FACE_MOUTH_CENTER, "HwMnoteFaceMouthCenter", N_("Mouth Center"), "MouthCenter"},
+
+	{0, "HwUnknow", N_("Unknow Tag"), "UnknowTag"},
+};
+
+static const MnoteHuaweiTable huawei_scene_table[] = {
 	{MNOTE_HUAWEI_SCENE_INFO, "HwMnoteScenePointer", N_("Scene Info"), "SceneInfo", MNOTE_HUAWEI_TAG_TYPE_IFD},
 	{MNOTE_HUAWEI_SCENE_VERSION, "HwMnoteSceneVersion", N_("Scene Version"), "SceneVersion"},
 	{MNOTE_HUAWEI_SCENE_FOOD_CONF, "HwMnoteSceneFoodConf", N_("Food Conf"), "FoodConf"},
@@ -41,63 +68,71 @@ static const struct {
 	{MNOTE_HUAWEI_SCENE_NIGHT_CONF, "HwMnoteSceneNightConf", N_("Night Conf"), "NightConf"},
 	{MNOTE_HUAWEI_SCENE_TEXT_CONF, "HwMnoteSceneTextConf", N_("Text Conf"), "TextConf"},
 
-	{MNOTE_HUAWEI_FACE_INFO, "HwMnoteFacePointer", N_("Face Info"), "FaceInfo", MNOTE_HUAWEI_TAG_TYPE_IFD},
-	{MNOTE_HUAWEI_FACE_VERSION, "HwMnoteFaceVersion", N_("Face Version"), "FaceVersion"},
-	{MNOTE_HUAWEI_FACE_COUNT, "HwMnoteFaceCount", N_("Count"), "Count"},
-	{MNOTE_HUAWEI_FACE_CONF, "HwMnoteFaceConf", N_("Conf"), "Conf"},
-	{MNOTE_HUAWEI_FACE_SMILE_SCORE, "HwMnoteFaceSmileScore", N_("Smile Score"), "SmileScore"},
-	{MNOTE_HUAWEI_FACE_RECT, "HwMnoteFaceRect", N_("Rect"), "Rect"},
-	{MNOTE_HUAWEI_FACE_LEYE_CENTER, "HwMnoteFaceLeyeCenter", N_("LeyeCenter"), "LeyeCenter"},
-	{MNOTE_HUAWEI_FACE_REYE_CENTER, "HwMnoteFaceReyeCenter", N_("Reye Center"), "ReyeCenter"},
-	{MNOTE_HUAWEI_FACE_MOUTH_CENTER, "HwMnoteFaceMouthCenter", N_("Mouth Center"), "MouthCenter"},
-
-	{MNOTE_HUAWEI_CAPTURE_MODE, "HwMnoteCaptureMode", N_("Capture Mode"), "CaptureMode"},
-	{MNOTE_HUAWEI_BURST_NUMBER, "HwMnoteBurstNumber", N_("Burst Number"), "BurstNumber"},
-	{MNOTE_HUAWEI_FRONT_CAMERA, "HwMnoteFrontCamera", N_("Front Camera"), "FrontCamera"},
-	{MNOTE_HUAWEI_ROLL_ANGLE, "HwMnoteRollAngle", N_("Roll Angle"), "RollAngle"},
-	{MNOTE_HUAWEI_PITCH_ANGLE, "HwMnotePitchAngle", N_("Pitch Angle"), "PitchAngle"},
-	{MNOTE_HUAWEI_PHYSICAL_APERTURE, "HwMnotePhysicalAperture", N_("Physical Aperture"), "PhysicalAperture"},
-	{MNOTE_HUAWEI_FOCUS_MODE, "HwMnoteFocusMode", N_("Focus Mode"), "FocusMode"},
-
 	{0, "HwUnknow", N_("Unknow Tag"), "UnknowTag"},
 };
 
-#define GET_TAG_INFO(t, idx, ret) do {	\
-									for (int i = 0; i < sizeof (table) / sizeof (table[0]); i++) { \
-									    ret = table[i].idx;										 \
-										if (table[i].tag == t) break;	 	 					 \
+#define GET_TAG_INFO(tb, tb_size, tag, idx, ret) do {	\
+									for (int i = 0; i<tb_size; i++) { \
+										if (tb[i].tag == tag) {ret = tb[i].idx; return ret;}\
 									} \
-							   } while (0)													 
-							   
+									ret = tb[tb_size-1].idx;\
+								} while (0)
+
+const int HUAWEI_TABLE = 9;
+const int HUAWEI_FACE_TABLE = 8;
+
+const MnoteHuaweiTable* get_tag_table(MnoteHuaweiTag tag, int* size) 
+{
+	if (tag >> HUAWEI_TABLE & 1) {
+		*size = sizeof (huawei_table) / sizeof (huawei_table[0]);
+		return huawei_table;
+	}
+
+	if (tag >> HUAWEI_FACE_TABLE & 1) {
+		*size = sizeof (huawei_face_table) / sizeof (huawei_face_table[0]);
+		return huawei_face_table;
+	}
+
+	*size = sizeof (huawei_scene_table) / sizeof (huawei_scene_table[0]);
+	return huawei_scene_table;
+}
 
 const char *
-mnote_huawei_tag_get_name (MnoteHuaweiTag t) 
+mnote_huawei_tag_get_name (MnoteHuaweiTag tag) 
 {
 	const char* p = NULL;
-	GET_TAG_INFO(t, name, p);
+	int size = 0;
+	const MnoteHuaweiTable* tb = get_tag_table(tag, &size);
+	GET_TAG_INFO(tb, size, tag, name, p);
 	return p;
 }
 
 const char *
-mnote_huawei_tag_get_title (MnoteHuaweiTag t) 
+mnote_huawei_tag_get_title (MnoteHuaweiTag tag)
 {
 	const char* p = NULL;
-	GET_TAG_INFO(t, title, p);
+	int size = 0;
+	const MnoteHuaweiTable* tb = get_tag_table(tag, &size);
+	GET_TAG_INFO(tb, size, tag, title, p);
 	return p;
 }
 
 const char *
-mnote_huawei_tag_get_description (MnoteHuaweiTag t) 
+mnote_huawei_tag_get_description (MnoteHuaweiTag tag) 
 {
 	const char* p = NULL;
-	GET_TAG_INFO(t, description, p);
+	int size = 0;
+	const MnoteHuaweiTable* tb = get_tag_table(tag, &size);
+	GET_TAG_INFO(tb, size, tag, description, p);
 	return p;
 }
 
 MnoteHuaweiTagType
-mnote_huawei_tag_type (MnoteHuaweiTag t) 
+mnote_huawei_tag_type (MnoteHuaweiTag tag) 
 {
 	MnoteHuaweiTagType p = 0;
-	GET_TAG_INFO(t, TagType, p);
+	int size = 0;
+	const MnoteHuaweiTable* tb = get_tag_table(tag, &size);
+	GET_TAG_INFO(tb, size, tag, TagType, p);
 	return p;
 }

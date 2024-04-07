@@ -25,6 +25,9 @@
 #include <libexif/huawei/mnote-huawei-entry.h>
 #include <libexif/huawei/mnote-huawei-data-type.h>
 
+
+extern const char HUAWEI_HEADER[];
+
 typedef struct _ExifMnoteDataHuawei ExifMnoteDataHuawei;
 
 

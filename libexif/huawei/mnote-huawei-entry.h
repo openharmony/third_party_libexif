@@ -21,6 +21,7 @@
 #include <libexif/huawei/mnote-huawei-tag.h>
 
 typedef struct _MnoteHuaweiEntry        MnoteHuaweiEntry;
+typedef struct _ExifMnoteDataHuawei     ExifMnoteDataHuawei;
 
 struct _MnoteHuaweiEntry {
 	MnoteHuaweiTag tag;
@@ -40,6 +41,7 @@ extern "C" {
 #endif /* __cplusplus */
 
 char *mnote_huawei_entry_get_value (MnoteHuaweiEntry *entry, char *v, unsigned int maxlen);
+int mnote_huawei_entry_set_value(MnoteHuaweiEntry *entry, const char *v, int strlen);
 
 #ifdef __cplusplus
 }

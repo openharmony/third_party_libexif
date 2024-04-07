@@ -1516,7 +1516,6 @@ exif_entry_initialize (ExifEntry *e, ExifTag tag)
 		break;
 
 	/* SHORT, 1 component, no default */
-	case EXIF_TAG_SUBJECT_LOCATION:
 	case EXIF_TAG_SENSING_METHOD:
 	case EXIF_TAG_PHOTOMETRIC_INTERPRETATION:
 	case EXIF_TAG_COMPRESSION:
@@ -1595,6 +1594,7 @@ exif_entry_initialize (ExifEntry *e, ExifTag tag)
 		break;
 
 	/* SHORT, 2 components, default 0 0 */
+	case EXIF_TAG_SUBJECT_LOCATION:
 	case EXIF_TAG_SUBJECT_AREA:
 		e->components = 2;
 		e->format = EXIF_FORMAT_SHORT;
