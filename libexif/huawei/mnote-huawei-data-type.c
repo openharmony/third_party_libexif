@@ -55,11 +55,11 @@ exif_huawei_entry_count_free (MnoteHuaweiEntryCount *ec)
 {
 	ExifMem *mem;
 
-	if (!ec) 
+	if (!ec)
 		return;
 
 	mem = ec->mem;
-	if (ec->entries) 
+	if (ec->entries)
 		exif_mem_free(mem, ec->entries);
 	
 	exif_mem_free (mem, ec);

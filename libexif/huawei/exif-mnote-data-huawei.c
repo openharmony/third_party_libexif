@@ -29,7 +29,7 @@
 const int DATA_OR_OFFSET = 4;
 const int HUAWEI_HEADER_OFFSET = 8;
 const char HUAWEI_HEADER[] = { 'H', 'U', 'A', 'W', 'E', 'I', '\0', '\0',
-                                0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00};
+                               0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00};
 
 void memory_dump(const void *ptr, int len) 
 {
@@ -37,8 +37,8 @@ void memory_dump(const void *ptr, int len)
     for (int i = 0; i < len; i++) {
         if (i % 8 == 0 && i != 0)
             printf(" ");
-        if (i % 16 == 0 && i != 0) 
-			printf("\n%08X: ", i);		        
+        if (i % 16 == 0 && i != 0)
+			printf("\n%08X: ", i);
         printf("%02x ", *((uint8_t *)ptr + i));
     }
     printf("\n");
@@ -84,6 +84,12 @@ exif_mnote_data_huawei_clear (ExifMnoteDataHuawei *n)
 		n->count = 0;
 		n->is_loaded = 0;
 	}
+
+	if (n->ifd_tag != MNOTE_HUAWEI_INFO && d->priv) {
+			exif_mem_free(d->mem, d->priv);
+			exif_mem_unref (d->mem);
+			d->priv = NULL;
+	}
 }
 
 static void
@@ -106,7 +112,7 @@ exif_mnote_data_huawei_set_offset (ExifMnoteData *n, unsigned int o)
 }
 
 static void
-exif_mnote_data_huawei_malloc_size_data (ExifMnoteData *ne, unsigned int *malloc_size) 
+exif_mnote_data_huawei_malloc_size_data (ExifMnoteData *ne, unsigned int *malloc_size)
 {
 	
 	ExifMnoteDataHuawei *n = (ExifMnoteDataHuawei *) ne;
@@ -172,6 +178,7 @@ exif_mnote_data_huawei_save_data (ExifMnoteData *ne, unsigned char *buf, unsigne
 			ExifMnoteDataHuawei *t_n = n->entries[i].md;
 			exif_mnote_data_huawei_save_data(n->entries[i].md, buf+ifd_data_offset + ifd_data_offset_increment, t_n->ifd_size, pOrder);
 			ifd_data_offset_increment += t_n->ifd_size;
+			exif_set_long (n->entries[i].data, n->order, t_offset);
 		}
 
 		if (components_size > DATA_OR_OFFSET) {
@@ -229,7 +236,7 @@ exif_mnote_data_huawei_save (ExifMnoteData *ne, unsigned char **buf, unsigned in
 }
 
 static int
-exif_mnote_data_huawei_load_data (ExifMnoteData *ne, const unsigned char *buf, unsigned int buf_size, 
+exif_mnote_data_huawei_load_data (ExifMnoteData *ne, const unsigned char *buf, unsigned int buf_size,
 								  unsigned int* cur_ifd_data_offset, const unsigned int order_offset)
 {
 	size_t tcount, offset, ifd_size=0;
@@ -343,7 +350,7 @@ exif_mnote_data_huawei_load (ExifMnoteData *ne, const unsigned char *buf, unsign
 		return;
 	}
 	
-	n->ifd_tag = 0xffff;
+	n->ifd_tag = MNOTE_HUAWEI_INFO;
 
 	if ((buf[0] == 'I' && buf[1] == 'I') || (buf[0] == 'M' && buf[1] == 'M')) {
 		head_offset = 0;
@@ -359,14 +366,14 @@ exif_mnote_data_huawei_load (ExifMnoteData *ne, const unsigned char *buf, unsign
 		n->order = EXIF_BYTE_ORDER_MOTOROLA;
 	else {
 		exif_log (ne->log, EXIF_LOG_CODE_CORRUPT_DATA,
-			  "ExifMnoteHuawei", "Unknown order.");
+				"ExifMnoteHuawei", "Unknown order.");
 		return;
 	}
 
 	/* Remove any old entries */
 	exif_mnote_data_huawei_clear (n);
 
-	unsigned int ifd_data_offset= n->offset + head_offset + sizeof(HUAWEI_HEADER);	
+	unsigned int ifd_data_offset= n->offset + head_offset + sizeof(HUAWEI_HEADER);
 	int ret = exif_mnote_data_huawei_load_data(ne, buf, buf_size, &ifd_data_offset, order_offset);
 	if (ret) {
 		exif_log (ne->log, EXIF_LOG_CODE_CORRUPT_DATA,
@@ -376,7 +383,7 @@ exif_mnote_data_huawei_load (ExifMnoteData *ne, const unsigned char *buf, unsign
 }
 
 unsigned int
-exif_mnote_data_huawei_count_data (ExifMnoteData *ne, MnoteHuaweiEntryCount* ec) 
+exif_mnote_data_huawei_count_data (ExifMnoteData *ne, MnoteHuaweiEntryCount* ec)
 {
 	ExifMnoteDataHuawei *n = (ExifMnoteDataHuawei *) ne;
 	if (!ne) return 0;
@@ -397,14 +404,15 @@ exif_mnote_data_huawei_count_data (ExifMnoteData *ne, MnoteHuaweiEntryCount* ec)
 }
 
 unsigned int
-exif_mnote_data_huawei_count (ExifMnoteData *ne) 
+exif_mnote_data_huawei_count (ExifMnoteData *ne)
 {
 	if (!ne) return 0;
 	unsigned int count = exif_mnote_data_huawei_count_data(ne, NULL);
 	return count;
 };	
 
-MnoteHuaweiEntry* exif_mnote_data_huawei_get_entry_by_tag_data (ExifMnoteDataHuawei *n, int *idx, const MnoteHuaweiTag tag) 
+MnoteHuaweiEntry* 
+exif_mnote_data_huawei_get_entry_by_tag_data (ExifMnoteDataHuawei *n, int *idx, const MnoteHuaweiTag tag)
 { 
 	MnoteHuaweiEntry* entry = NULL;
 	if (!n) return NULL;	
@@ -425,13 +433,15 @@ MnoteHuaweiEntry* exif_mnote_data_huawei_get_entry_by_tag_data (ExifMnoteDataHua
 	return entry;
 }
 
-MnoteHuaweiEntry* exif_mnote_data_huawei_get_entry_by_tag (ExifMnoteDataHuawei *n, const MnoteHuaweiTag tag) 
+MnoteHuaweiEntry* 
+exif_mnote_data_huawei_get_entry_by_tag (ExifMnoteDataHuawei *n, const MnoteHuaweiTag tag)
 {
 	int i = 0;
 	return exif_mnote_data_huawei_get_entry_by_tag_data(n, &i, tag);
 }
 
-MnoteHuaweiEntry* exif_mnote_data_huawei_get_entry_by_index_data (ExifMnoteDataHuawei *n, int *idx, const int dest_idx) 
+MnoteHuaweiEntry* 
+exif_mnote_data_huawei_get_entry_by_index_data (ExifMnoteDataHuawei *n, int *idx, const int dest_idx)
 { 
 	MnoteHuaweiEntry* entry = NULL;
 	if (!n) return NULL;	
@@ -452,13 +462,15 @@ MnoteHuaweiEntry* exif_mnote_data_huawei_get_entry_by_index_data (ExifMnoteDataH
 	return entry;
 }
 
-MnoteHuaweiEntry* exif_mnote_data_huawei_get_entry_by_index (ExifMnoteDataHuawei *n, const int dest_idx) 
+MnoteHuaweiEntry* 
+exif_mnote_data_huawei_get_entry_by_index (ExifMnoteDataHuawei *n, const int dest_idx)
 {
 	int i = 0;
 	return exif_mnote_data_huawei_get_entry_by_index_data(n, &i, dest_idx);
 }
 
-void mnote_huawei_get_entry_count (const ExifMnoteDataHuawei* n, MnoteHuaweiEntryCount** entry_count) 
+void 
+mnote_huawei_get_entry_count (const ExifMnoteDataHuawei* n, MnoteHuaweiEntryCount** entry_count)
 {
 	if (!n) return;	
 	
@@ -489,13 +501,13 @@ void mnote_huawei_get_entry_count (const ExifMnoteDataHuawei* n, MnoteHuaweiEntr
 	*entry_count = ec;
 }
 
-void mnote_huawei_free_entry_count (MnoteHuaweiEntryCount* entry_count) 
+void mnote_huawei_free_entry_count (MnoteHuaweiEntryCount* entry_count)
 {
 	exif_huawei_entry_count_free(entry_count);
 }
 
 static unsigned int
-exif_mnote_data_huawei_get_id (ExifMnoteData *ne, unsigned int i) 
+exif_mnote_data_huawei_get_id (ExifMnoteData *ne, unsigned int i)
 {
 	ExifMnoteDataHuawei *n = (ExifMnoteDataHuawei *) ne;
 	if (!n) return 0;
@@ -507,7 +519,7 @@ exif_mnote_data_huawei_get_id (ExifMnoteData *ne, unsigned int i)
 }
 
 static const char *
-exif_mnote_data_huawei_get_name (ExifMnoteData *ne, unsigned int i) 
+exif_mnote_data_huawei_get_name (ExifMnoteData *ne, unsigned int i)
 {
 	ExifMnoteDataHuawei *n = (ExifMnoteDataHuawei *) ne;
 	if (!n) return NULL;
@@ -519,7 +531,7 @@ exif_mnote_data_huawei_get_name (ExifMnoteData *ne, unsigned int i)
 }
 
 static const char *
-exif_mnote_data_huawei_get_title (ExifMnoteData *ne, unsigned int i) 
+exif_mnote_data_huawei_get_title (ExifMnoteData *ne, unsigned int i)
 {
 	ExifMnoteDataHuawei *n = (ExifMnoteDataHuawei *) ne;
 	if (!n) return NULL;
@@ -531,7 +543,7 @@ exif_mnote_data_huawei_get_title (ExifMnoteData *ne, unsigned int i)
 }
 
 static const char *
-exif_mnote_data_huawei_get_description (ExifMnoteData *ne, unsigned int i) 
+exif_mnote_data_huawei_get_description (ExifMnoteData *ne, unsigned int i)
 {
 	ExifMnoteDataHuawei *n = (ExifMnoteDataHuawei *) ne;
 	if (!n) return NULL;
@@ -555,7 +567,7 @@ exif_mnote_data_huawei_get_value (ExifMnoteData *ne, unsigned int i, char *val, 
 }
 
 int
-exif_mnote_data_huawei_identify (const ExifData *ed, const ExifEntry *e) 
+exif_mnote_data_huawei_identify (const ExifData *ed, const ExifEntry *e)
 {
 	int ret = 0;
 
@@ -575,7 +587,7 @@ int is_huawei_md(ExifMnoteData* ne)
 }
 
 ExifMnoteData *
-exif_mnote_data_huawei_new (ExifMem *mem) 
+exif_mnote_data_huawei_new (ExifMem *mem)
 {
 	ExifMnoteData *ne;
 

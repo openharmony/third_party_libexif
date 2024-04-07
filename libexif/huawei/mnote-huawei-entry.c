@@ -14,7 +14,6 @@
  */
 
 #include "config.h"
-#include "mnote-huawei-entry.h"
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -24,6 +23,10 @@
 #include <libexif/exif-format.h>
 #include <libexif/exif-utils.h>
 #include <libexif/i18n.h>
+
+#include "mnote-huawei-tag.h"
+#include "mnote-huawei-entry.h"
+#include "exif-mnote-data-huawei.h"
 
 
 char *
@@ -51,4 +54,84 @@ mnote_huawei_entry_get_value(MnoteHuaweiEntry *entry, char *v, unsigned int maxl
     
     *(v+write_pos-1) = 0;
     return v;
+}
+
+int
+mnote_huawei_entry_set_value(MnoteHuaweiEntry *entry, const char *v, int strlen) 
+{
+    unsigned char data[1024] = {0};
+    int increment = 0;
+    int components = 0;
+    int components_size = 0;
+    char *token = NULL;
+    int ret = 0;
+    char* pv = NULL;
+
+    if (!entry || !v || entry->md) {
+      ret = -1;
+      goto FAILED;
+    }
+    ExifMnoteData* parent_md = (ExifMnoteData*)entry->parent_md;
+    if (!parent_md) {
+      ret = -1;
+      goto FAILED;
+    }
+
+    if (entry->format == EXIF_FORMAT_UNDEFINED) {
+      increment = 1;
+    } else if (entry->format == EXIF_FORMAT_SLONG || EXIF_FORMAT_LONG) {
+      increment = 4;
+    } else {
+      ret = -1;
+      goto FAILED;
+    }
+
+    pv = exif_mem_alloc(parent_md->mem, strlen + 1);
+    if (!pv) {
+      ret = -1;
+      goto FAILED;
+    }
+    *(pv+strlen) = 0;
+    memcpy(pv, v, strlen);
+
+    token = strtok(pv, " ");
+    for (;token && components_size < sizeof(data);) {
+      int value = atoi(token);
+      int offset = increment*components;
+      if (increment == 1) { 
+        if (value > 0xff || value < 0) {
+          ret = -1;
+          goto FAILED;
+        }       
+        *(data+offset) = value;
+      } else {
+         exif_set_slong((data+offset), entry->order, value);
+      }
+      components++;
+      components_size = components * increment;
+      token = strtok(NULL, " ");
+    }
+
+    if (!components || (entry->format != EXIF_FORMAT_UNDEFINED && components > 1)) {
+      ret = -1;
+      goto FAILED;
+    }
+
+    if (entry->size < components_size) {
+      unsigned char* realloc = NULL;
+      realloc = exif_mem_realloc(parent_md->mem, entry->data, components_size);
+      if (!realloc) {
+        ret = -1;
+        goto FAILED;
+      }
+      entry->data = realloc;
+    }
+
+    entry->components = components;
+    entry->size = components_size;
+    memcpy(entry->data, data, components_size);
+
+FAILED:
+    if (pv) exif_mem_free(parent_md->mem, pv);
+    return ret;
 }

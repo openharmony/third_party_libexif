@@ -448,7 +448,7 @@ static const struct TagEntry {
 	{EXIF_TAG_CFA_REPEAT_PATTERN_DIM, "CFARepeatPatternDim",
 	 "CFARepeatPatternDim", "", ESL_UNKNOWN},
 	/* Not in EXIF 2.2 */
-	{EXIF_TAG_CFA_PATTERN, "CFAPattern",
+	{EXIF_TAG_CFA_PATTERN, "CFAPattern2",
 	 N_("CFA Pattern"),
 	 N_("Indicates the color filter array (CFA) geometric pattern of the "
 	    "image sensor when a one-chip color area sensor is used. "
