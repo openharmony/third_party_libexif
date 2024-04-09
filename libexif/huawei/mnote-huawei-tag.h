@@ -23,6 +23,7 @@ extern "C" {
 #endif /* __cplusplus */
 
 enum _MnoteHuaweiTag {
+	MNOTE_HUAWEI_INFO				= 0xFFFF,
 	MNOTE_HUAWEI_CAPTURE_MODE		= 0x0200,
 	MNOTE_HUAWEI_BURST_NUMBER		= 0x0201,
 	MNOTE_HUAWEI_FRONT_CAMERA		= 0x0202,
@@ -67,7 +68,7 @@ typedef enum _MnoteHuaweiTagType MnoteHuaweiTagType;
 const char *mnote_huawei_tag_get_name        (MnoteHuaweiTag);
 const char *mnote_huawei_tag_get_title       (MnoteHuaweiTag);
 const char *mnote_huawei_tag_get_description (MnoteHuaweiTag);
-MnoteHuaweiTagType mnote_huawei_tag_type 	 (MnoteHuaweiTag);
+MnoteHuaweiTagType mnote_huawei_tag_type     (MnoteHuaweiTag);
 
 #ifdef __cplusplus
 }
