@@ -83,12 +83,12 @@ const int HUAWEI_FACE_TABLE = 8;
 
 const MnoteHuaweiTable* get_tag_table(MnoteHuaweiTag tag, int* size) 
 {
-	if (tag >> HUAWEI_TABLE & 1) {
+	if ((tag >> HUAWEI_TABLE) & 1) {
 		*size = sizeof (huawei_table) / sizeof (huawei_table[0]);
 		return huawei_table;
 	}
 
-	if (tag >> HUAWEI_FACE_TABLE & 1) {
+	if ((tag >> HUAWEI_FACE_TABLE) & 1) {
 		*size = sizeof (huawei_face_table) / sizeof (huawei_face_table[0]);
 		return huawei_face_table;
 	}
