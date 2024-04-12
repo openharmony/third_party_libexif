@@ -148,13 +148,14 @@ exif_mnote_data_huawei_malloc_size_data (ExifMnoteData *ne, unsigned int *malloc
 }
 
 static void
-exif_mnote_data_huawei_save_data (ExifMnoteData *ne, unsigned char *buf, unsigned int buf_size, const unsigned char *pOrder) 
+exif_mnote_data_huawei_save_data (ExifMnoteData *ne, unsigned char *buf,
+								  unsigned int buf_size, const unsigned char *pOrder)
 {
 
 	ExifMnoteDataHuawei *n = (ExifMnoteDataHuawei *) ne;
 	if (!n || !buf || !buf_size || !pOrder) return;
 
-	size_t  offset=0;
+	unsigned int offset=0;
 	const unsigned int ifd_data_offset = 2 + n->count * 12 + 4;
 	unsigned int ifd_data_offset_increment = 0;
 
@@ -162,21 +163,23 @@ exif_mnote_data_huawei_save_data (ExifMnoteData *ne, unsigned char *buf, unsigne
 	exif_set_short (buf, n->order, (ExifShort) n->count);
 	
 	/* Save each entry */
-	for (int i = 0; i < n->count; i++) {
+	for (unsigned int i = 0; i < n->count; i++) {
 		offset = 2 + i * 12;
 		exif_set_short (buf + offset + 0, n->order, (ExifShort) n->entries[i].tag);
 		exif_set_short (buf + offset + 2, n->order, (ExifShort) n->entries[i].format);
 		exif_set_long  (buf + offset + 4, n->order, n->entries[i].components);
 		offset += 8;
 
-		size_t components_size = exif_format_get_size (n->entries[i].format) *
+		unsigned int components_size = exif_format_get_size (n->entries[i].format) *
 						n->entries[i].components;
 
-		ExifLong t_offset = buf + ifd_data_offset + ifd_data_offset_increment - pOrder;
+		unsigned int t_offset = buf + ifd_data_offset + ifd_data_offset_increment - pOrder;
 		if (n->entries[i].md) {
 			exif_set_long (buf + offset, n->order, t_offset);
 			ExifMnoteDataHuawei *t_n = n->entries[i].md;
-			exif_mnote_data_huawei_save_data(n->entries[i].md, buf+ifd_data_offset + ifd_data_offset_increment, t_n->ifd_size, pOrder);
+			exif_mnote_data_huawei_save_data(n->entries[i].md,
+											 buf+ifd_data_offset + ifd_data_offset_increment,
+											 t_n->ifd_size, pOrder);
 			ifd_data_offset_increment += t_n->ifd_size;
 			exif_set_long (n->entries[i].data, n->order, t_offset);
 		}
@@ -409,10 +412,11 @@ exif_mnote_data_huawei_count (ExifMnoteData *ne)
 	if (!ne) return 0;
 	unsigned int count = exif_mnote_data_huawei_count_data(ne, NULL);
 	return count;
-};	
+};
 
 MnoteHuaweiEntry* 
-exif_mnote_data_huawei_get_entry_by_tag_data (ExifMnoteDataHuawei *n, int *idx, const MnoteHuaweiTag tag)
+exif_mnote_data_huawei_get_entry_by_tag_data (ExifMnoteDataHuawei *n, int *idx,
+											  const MnoteHuaweiTag tag)
 { 
 	MnoteHuaweiEntry* entry = NULL;
 	if (!n) return NULL;	
@@ -426,7 +430,8 @@ exif_mnote_data_huawei_get_entry_by_tag_data (ExifMnoteDataHuawei *n, int *idx, 
 
 		ExifMnoteData *md = n->entries[i].md;
 		if (md) {
-			entry = exif_mnote_data_huawei_get_entry_by_tag_data((ExifMnoteDataHuawei *)md, idx, tag);
+			entry = exif_mnote_data_huawei_get_entry_by_tag_data((ExifMnoteDataHuawei *)md,
+																 idx, tag);
 			if (entry) break;
 		}
 	}
