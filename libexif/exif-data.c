@@ -234,7 +234,10 @@ exif_data_load_data_entry (ExifData *data, ExifEntry *entry,
 					       entry->data[6]);
 		}
 
-		if (!data->priv->offset_mnote || (entry->data && !memcmp(entry->data, HUAWEI_HEADER, 8))) {
+		if (!data->priv->offset_mnote) {
+			data->priv->offset_mnote = doff;
+		}
+		if (entry->data && (entry->size > 8) && !memcmp(entry->data, HUAWEI_HEADER, 8)) {
 			data->priv->offset_mnote = doff;
 		}
 	}
@@ -405,8 +408,7 @@ exif_data_save_data_entry_general (ExifData *data, ExifEntry *e,
 		if (s & 1)
 			*(*d + *ds - 1) = '\0';
 
-	}
-	else
+	} else
 		doff = offset + 8;
 
 	/* Write the data. Fill unneeded bytes with 0. Do not crash with
@@ -415,8 +417,7 @@ exif_data_save_data_entry_general (ExifData *data, ExifEntry *e,
 		unsigned int len = s;
 		if (e->size < s) len = e->size;
 		memcpy(*d + 6 - JPEG_HEADER_LEN + doff, e->data, len);
-	}
-	else {
+	} else {
 		memset(*d + 6 - JPEG_HEADER_LEN + doff, 0, s);
 	}
 	if (s < 4)
@@ -1375,7 +1376,7 @@ exif_data_load_data (ExifData *data, const unsigned char *d_orig,
 			exif_log (data->priv->log, EXIF_LOG_CODE_CORRUPT_DATA,
 				  "ExifData", "Bogus offset of IFD1.");
 		} else {
-		   exif_data_load_data_content (data, EXIF_IFD_1, d + 6, ds - 6, offset, 0);
+			exif_data_load_data_content (data, EXIF_IFD_1, d + 6, ds - 6, offset, 0);
 		}
 	}
 
@@ -1461,8 +1462,7 @@ exif_data_load_data_general (ExifData* data, const unsigned char* d_orig,
 		if (offset > ds - 6 + 6) {
 			exif_log(data->priv->log, EXIF_LOG_CODE_CORRUPT_DATA,
 				"ExifData", "Bogus offset of IFD1.");
-		}
-		else {
+		} else {
 			exif_data_load_data_content(data, EXIF_IFD_1, d + 6 - 6, ds - 6 + 6, offset, 0);
 		}
 	}
