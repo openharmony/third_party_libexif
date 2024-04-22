@@ -223,8 +223,10 @@ exif_content_get_huawei_makenote_entry (ExifContent *content)
 	ExifEntry *entry = NULL;
 	for (unsigned int i = 0; i < content->count; i++) {
 		entry = content->entries[i];
-		if ((entry->tag == EXIF_TAG_MAKER_NOTE) && (!memcmp(entry->data, "HUAWEI\0\0", 8))) {
-			return entry;
+		if (entry->tag == EXIF_TAG_MAKER_NOTE) {
+			if (entry->data && (entry->size > 8) && (!memcmp(entry->data, "HUAWEI\0\0", 8))) {
+				return entry;
+			}
 		}
 	}
 
