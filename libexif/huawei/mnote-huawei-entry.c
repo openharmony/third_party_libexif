@@ -58,21 +58,17 @@ int
 mnote_huawei_entry_set_value(MnoteHuaweiEntry *entry, const char *v, int strlen)
 {
     unsigned char data[1024] = {0};
-    int increment = 0;
-    int components = 0;
-    int components_size = 0;
-    char *token = NULL;
-    int ret = 0;
-    char* pv = NULL;
+    int increment = 0, components = 0, components_size = 0, ret = 0;
+    char *token = NULL, *pv = NULL;
 
     if (!entry || !v || entry->md) {
       ret = -1;
-      goto FAILED;
+      goto FINISH;
     }
     ExifMnoteData* parent_md = (ExifMnoteData*)entry->parent_md;
     if (!parent_md) {
       ret = -1;
-      goto FAILED;
+      goto FINISH;
     }
 
     if (entry->format == EXIF_FORMAT_UNDEFINED) {
@@ -81,13 +77,13 @@ mnote_huawei_entry_set_value(MnoteHuaweiEntry *entry, const char *v, int strlen)
       increment = 4;
     } else {
       ret = -1;
-      goto FAILED;
+      goto FINISH;
     }
 
     pv = exif_mem_alloc(parent_md->mem, strlen + 1);
     if (!pv) {
       ret = -1;
-      goto FAILED;
+      goto FINISH;
     }
     *(pv+strlen) = 0;
     memcpy(pv, v, strlen);
@@ -99,8 +95,8 @@ mnote_huawei_entry_set_value(MnoteHuaweiEntry *entry, const char *v, int strlen)
       if (increment == 1) {
         if (value > 0xff || value < 0) {
           ret = -1;
-          goto FAILED;
-        }
+          goto FINISH;
+        }       
         *(data+offset) = value;
       } else {
          exif_set_slong((data+offset), entry->order, value);
@@ -112,7 +108,7 @@ mnote_huawei_entry_set_value(MnoteHuaweiEntry *entry, const char *v, int strlen)
 
     if (!components || (entry->format != EXIF_FORMAT_UNDEFINED && components > 1)) {
       ret = -1;
-      goto FAILED;
+      goto FINISH;
     }
 
     if (entry->size < components_size) {
@@ -120,16 +116,16 @@ mnote_huawei_entry_set_value(MnoteHuaweiEntry *entry, const char *v, int strlen)
       realloc = exif_mem_realloc(parent_md->mem, entry->data, components_size);
       if (!realloc) {
         ret = -1;
-        goto FAILED;
+        goto FINISH;
       }
       entry->data = realloc;
+      entry->size = components_size;
     }
 
     entry->components = components;
-    entry->size = components_size;
     memcpy(entry->data, data, components_size);
 
-FAILED:
+FINISH:
     if (pv) exif_mem_free(parent_md->mem, pv);
     return ret;
 }
