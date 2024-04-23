@@ -237,7 +237,8 @@ exif_data_load_data_entry (ExifData *data, ExifEntry *entry,
 		if (!data->priv->offset_mnote) {
 			data->priv->offset_mnote = doff;
 		}
-		if (entry->data && (entry->size > 8) && !memcmp(entry->data, HUAWEI_HEADER, 8)) {
+		if (entry->data && (entry->size >= 8) &&
+			!memcmp(entry->data, HUAWEI_HEADER, 8)) {
 			data->priv->offset_mnote = doff;
 		}
 	}
@@ -268,7 +269,10 @@ exif_data_save_data_entry (ExifData *data, ExifEntry *e,
 		/* If this is the maker note tag, update it. */
 		do {
 			if ((e->tag == EXIF_TAG_MAKER_NOTE) && data->priv->md) {
-				if (is_huawei_md(data->priv->md) && memcmp(e->data, HUAWEI_HEADER, 8)) break;
+				if (is_huawei_md(data->priv->md) &&
+					e->data && (e->size >= 8) &&
+					memcmp(e->data, HUAWEI_HEADER, 8))
+					break;
 
 				/* TODO: this is using the wrong ExifMem to free e->data */
 				exif_mem_free (data->priv->mem, e->data);
@@ -358,7 +362,10 @@ exif_data_save_data_entry_general (ExifData *data, ExifEntry *e,
 		/* If this is the maker note tag, update it. */
 		do {
 			if ((e->tag == EXIF_TAG_MAKER_NOTE) && data->priv->md) {
-				if (is_huawei_md(data->priv->md) && memcmp(e->data, HUAWEI_HEADER, 8)) break;
+				if (is_huawei_md(data->priv->md) &&
+					e->data && (e->size >= 8) &&
+					memcmp(e->data, HUAWEI_HEADER, 8))
+					break;
 
 				/* TODO: this is using the wrong ExifMem to free e->data */
 				exif_mem_free(data->priv->mem, e->data);
