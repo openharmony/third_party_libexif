@@ -25,11 +25,9 @@
 #include <libexif/huawei/mnote-huawei-entry.h>
 #include <libexif/huawei/mnote-huawei-data-type.h>
 
-
 extern const char HUAWEI_HEADER[];
-
 typedef struct _ExifMnoteDataHuawei ExifMnoteDataHuawei;
-
+typedef struct _MnoteHuaweiEntryCount MnoteHuaweiEntryCount;
 
 struct _ExifMnoteDataHuawei {
 	ExifMnoteData parent;
@@ -43,8 +41,6 @@ struct _ExifMnoteDataHuawei {
 	unsigned int ifd_size;
 	unsigned int is_loaded;
 };
-
-typedef struct _MnoteHuaweiEntryCount MnoteHuaweiEntryCount;
 
 struct _MnoteHuaweiEntryCount {
 	MnoteHuaweiEntry** entries;
@@ -62,7 +58,6 @@ struct _MnoteHuaweiEntryCount {
  *   value returned may identify a subtype unique within this module.
  */
 
-
 int exif_mnote_data_huawei_identify (const ExifData *ed, const ExifEntry *e);
 
 ExifMnoteData *exif_mnote_data_huawei_new (ExifMem *mem);
@@ -73,8 +68,12 @@ extern "C" {
 
 int is_huawei_md(ExifMnoteData* md);
 void print_huawei_md(const ExifMnoteDataHuawei* n);
+ExifByteOrder exif_mnote_data_huawei_get_byte_order(ExifMnoteData *ne);
 void mnote_huawei_free_entry_count(MnoteHuaweiEntryCount* entry_count);
 void mnote_huawei_get_entry_count(const ExifMnoteDataHuawei* n, MnoteHuaweiEntryCount** entry_count);
+void exif_mnote_data_huawei_clear (ExifMnoteDataHuawei *n);
+int exif_mnote_data_add_entry (ExifMnoteData *ne, MnoteHuaweiEntry *e);
+void exif_mnote_data_remove_entry (ExifMnoteData *ne, MnoteHuaweiEntry *e);
 MnoteHuaweiEntry* exif_mnote_data_huawei_get_entry_by_tag (ExifMnoteDataHuawei *n, const MnoteHuaweiTag tag);
 MnoteHuaweiEntry* exif_mnote_data_huawei_get_entry_by_index (ExifMnoteDataHuawei *n, const int dest_idx);
 
