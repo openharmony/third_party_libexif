@@ -34,6 +34,7 @@ struct _MnoteHuaweiEntry {
 
 	void *md;
 	void *parent_md;
+	ExifMem *mem;
 };
 
 #ifdef __cplusplus
@@ -42,6 +43,13 @@ extern "C" {
 
 char *mnote_huawei_entry_get_value (MnoteHuaweiEntry *entry, char *v, unsigned int maxlen);
 int mnote_huawei_entry_set_value(MnoteHuaweiEntry *entry, const char *v, int strlen);
+
+MnoteHuaweiEntry *mnote_huawei_entry_new(ExifMnoteData *n);
+void mnote_huawei_entry_replace_mem(MnoteHuaweiEntry *e, ExifMem *mem);
+void mnote_huawei_entry_free_content(MnoteHuaweiEntry *e);
+void mnote_huawei_entry_free_contour(MnoteHuaweiEntry *e);
+void mnote_huawei_entry_free(MnoteHuaweiEntry *e);
+void mnote_huawei_entry_initialize(MnoteHuaweiEntry *e, MnoteHuaweiTag tag, ExifByteOrder order);
 
 #ifdef __cplusplus
 }
