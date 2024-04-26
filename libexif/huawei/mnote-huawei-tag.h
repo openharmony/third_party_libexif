@@ -31,6 +31,9 @@ enum _MnoteHuaweiTag {
 	MNOTE_HUAWEI_PITCH_ANGLE		= 0x0204,
 	MNOTE_HUAWEI_PHYSICAL_APERTURE	= 0x0205,
 	MNOTE_HUAWEI_FOCUS_MODE			= 0x020d,
+	MNOTE_MOVING_PHOTO_ID			= 0x020e,
+	MNOTE_MOVING_PHOTO_VERSION		= 0x020f,
+	MNOTE_MICRO_VIDEO_PRESENTATION_TIMESTAMP_US	= 0x0210,
 
 	MNOTE_HUAWEI_SCENE_INFO			= 0x0000, /* subtree */
 	MNOTE_HUAWEI_SCENE_VERSION		= 0x0001, 
@@ -65,10 +68,13 @@ enum _MnoteHuaweiTagType {
 };
 typedef enum _MnoteHuaweiTagType MnoteHuaweiTagType;
 
-const char *mnote_huawei_tag_get_name        (MnoteHuaweiTag);
-const char *mnote_huawei_tag_get_title       (MnoteHuaweiTag);
-const char *mnote_huawei_tag_get_description (MnoteHuaweiTag);
-MnoteHuaweiTagType mnote_huawei_tag_type     (MnoteHuaweiTag);
+MnoteHuaweiTag mnote_huawei_tag_from_name(const char *name);
+const char *mnote_huawei_tag_get_name(MnoteHuaweiTag);
+const char *mnote_huawei_tag_get_title(MnoteHuaweiTag);
+const char *mnote_huawei_tag_get_description(MnoteHuaweiTag);
+MnoteHuaweiTagType mnote_huawei_tag_type(MnoteHuaweiTag);
+MnoteHuaweiTag get_tag_owner_tag(MnoteHuaweiTag tag);
+int is_ifd_tag(MnoteHuaweiTag tag);
 
 #ifdef __cplusplus
 }
