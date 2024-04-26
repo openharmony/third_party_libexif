@@ -73,7 +73,7 @@ mnote_huawei_entry_set_value(MnoteHuaweiEntry *entry, const char *v, int strlen)
 
     if (entry->format == EXIF_FORMAT_UNDEFINED) {
       increment = 1;
-    } else if (entry->format == EXIF_FORMAT_SLONG || EXIF_FORMAT_LONG) {
+    } else if (entry->format == EXIF_FORMAT_SLONG || entry->format == EXIF_FORMAT_LONG) {
       increment = 4;
     } else {
       ret = -1;
