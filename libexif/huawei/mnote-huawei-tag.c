@@ -15,6 +15,7 @@
 
 #include <config.h>
 #include <stdlib.h>
+#include <string.h>
 #include <libexif/i18n.h>
 #include "mnote-huawei-tag.h"
 
@@ -36,6 +37,11 @@ static const MnoteHuaweiTable huawei_table[] = {
 	{MNOTE_HUAWEI_PITCH_ANGLE, "HwMnotePitchAngle", N_("Pitch Angle"), "PitchAngle"},
 	{MNOTE_HUAWEI_PHYSICAL_APERTURE, "HwMnotePhysicalAperture", N_("Physical Aperture"), "PhysicalAperture"},
 	{MNOTE_HUAWEI_FOCUS_MODE, "HwMnoteFocusMode", N_("Focus Mode"), "FocusMode"},
+	{MNOTE_MOVING_PHOTO_ID, "MovingPhotoId", N_("Moving Photo Id"), "MovingPhotoId"},
+	{MNOTE_MOVING_PHOTO_VERSION, "MovingPhotoVersion", N_("Moving Photo Version"),
+	"MovingPhotoVersion"},
+	{MNOTE_MICRO_VIDEO_PRESENTATION_TIMESTAMP_US, "MicroVideoPresentationTimestampUS",
+	N_("Video Presentation Timestamp US"), "VideoPresentationTimestampUS"},
 
 	{0, "HwUnknow", N_("Unknow Tag"), "UnknowTag"},
 };
@@ -81,7 +87,7 @@ static const MnoteHuaweiTable huawei_scene_table[] = {
 const int HUAWEI_TABLE = 9;
 const int HUAWEI_FACE_TABLE = 8;
 
-const MnoteHuaweiTable* get_tag_table(MnoteHuaweiTag tag, int* size) 
+const MnoteHuaweiTable* get_tag_table(MnoteHuaweiTag tag, int* size)
 {
 	if ((tag >> HUAWEI_TABLE) & 1) {
 		*size = sizeof (huawei_table) / sizeof (huawei_table[0]);
@@ -97,8 +103,69 @@ const MnoteHuaweiTable* get_tag_table(MnoteHuaweiTag tag, int* size)
 	return huawei_scene_table;
 }
 
+MnoteHuaweiTag get_tag_owner_tag(MnoteHuaweiTag tag)
+{
+	MnoteHuaweiTag owner_tag = MNOTE_HUAWEI_INFO;
+	do {
+		if (((tag >> HUAWEI_TABLE) & 1) ||
+			(tag == MNOTE_HUAWEI_FACE_INFO) ||
+			(tag == MNOTE_HUAWEI_SCENE_INFO))
+			break;
+
+		if ((tag >> HUAWEI_FACE_TABLE) & 1) {
+			owner_tag = MNOTE_HUAWEI_FACE_INFO;
+			break;
+		}
+
+		owner_tag = MNOTE_HUAWEI_SCENE_INFO;
+	} while(0);
+	return owner_tag;
+}
+
+int is_ifd_tag(MnoteHuaweiTag tag)
+{
+	int b = 0;
+	if ((tag == MNOTE_HUAWEI_INFO) ||
+		(tag == MNOTE_HUAWEI_FACE_INFO) ||
+		(tag == MNOTE_HUAWEI_SCENE_INFO))
+		b = 1;
+	return b;
+}
+
+MnoteHuaweiTag mnote_huawei_tag_from_name(const char *name)
+{
+	int i;
+	MnoteHuaweiTag hw_tag = MNOTE_HUAWEI_INFO;
+	int size = sizeof (huawei_table) / sizeof (huawei_table[0]) - 1;
+	for (i = 0; i < size; i++) {
+		if (!strcmp(huawei_table[i].name, name)) {
+			hw_tag = huawei_table[i].tag;
+			goto End;
+		}
+	}
+
+	size = sizeof (huawei_face_table) / sizeof (huawei_face_table[0]) - 1;
+	for (i = 0; i < size; i++) {
+		if (!strcmp(huawei_face_table[i].name, name)) {
+			hw_tag = huawei_face_table[i].tag;
+			goto End;
+		}
+	}
+
+	size = sizeof (huawei_scene_table) / sizeof (huawei_scene_table[0]) - 1;
+	for (i = 0; i < size; i++) {
+		if (!strcmp(huawei_scene_table[i].name, name)) {
+			hw_tag = huawei_scene_table[i].tag;
+			goto End;
+		}
+	}
+
+End:
+	return hw_tag;
+}
+
 const char *
-mnote_huawei_tag_get_name (MnoteHuaweiTag tag) 
+mnote_huawei_tag_get_name (MnoteHuaweiTag tag)
 {
 	const char* p = NULL;
 	int size = 0;
@@ -118,7 +185,7 @@ mnote_huawei_tag_get_title (MnoteHuaweiTag tag)
 }
 
 const char *
-mnote_huawei_tag_get_description (MnoteHuaweiTag tag) 
+mnote_huawei_tag_get_description (MnoteHuaweiTag tag)
 {
 	const char* p = NULL;
 	int size = 0;
@@ -128,7 +195,7 @@ mnote_huawei_tag_get_description (MnoteHuaweiTag tag)
 }
 
 MnoteHuaweiTagType
-mnote_huawei_tag_type (MnoteHuaweiTag tag) 
+mnote_huawei_tag_type (MnoteHuaweiTag tag)
 {
 	MnoteHuaweiTagType p = 0;
 	int size = 0;
