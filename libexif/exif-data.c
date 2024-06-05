@@ -97,6 +97,20 @@ exif_data_get_mnote_data (ExifData *d)
 	return (d && d->priv) ? d->priv->md : NULL;
 }
 
+ExifMem *
+exif_data_get_priv_mem (ExifData *d)
+{
+	return (d && d->priv) ? d->priv->mem : NULL;
+}
+
+void
+exif_data_set_priv_md (ExifData *d, ExifMnoteData *md)
+{
+	if (d && d->priv) {
+		d->priv->md = md;
+	}
+}
+
 ExifData *
 exif_data_new (void)
 {
