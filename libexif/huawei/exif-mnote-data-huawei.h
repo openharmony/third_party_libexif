@@ -60,7 +60,6 @@ struct _MnoteHuaweiEntryCount {
 
 int exif_mnote_data_huawei_identify (const ExifData *ed, const ExifEntry *e);
 
-ExifMnoteData *exif_mnote_data_huawei_new (ExifMem *mem);
 
 #ifdef __cplusplus
 extern "C" {
@@ -76,7 +75,7 @@ int exif_mnote_data_add_entry (ExifMnoteData *ne, MnoteHuaweiEntry *e);
 void exif_mnote_data_remove_entry (ExifMnoteData *ne, MnoteHuaweiEntry *e);
 MnoteHuaweiEntry* exif_mnote_data_huawei_get_entry_by_tag (ExifMnoteDataHuawei *n, const MnoteHuaweiTag tag);
 MnoteHuaweiEntry* exif_mnote_data_huawei_get_entry_by_index (ExifMnoteDataHuawei *n, const int dest_idx);
-
+ExifMnoteData *exif_mnote_data_huawei_new (ExifMem *mem);
 #ifdef __cplusplus
 }
 #endif /* __cplusplus */
