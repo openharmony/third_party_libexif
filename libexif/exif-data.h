@@ -153,6 +153,10 @@ void          exif_data_set_byte_order  (ExifData *data, ExifByteOrder order);
  */
 ExifMnoteData *exif_data_get_mnote_data (ExifData *d);
 
+ExifMem *exif_data_get_priv_mem (ExifData *d);
+
+void exif_data_set_priv_md (ExifData *d, ExifMnoteData *md);
+
 /*! Fix the EXIF data to bring it into specification. Call #exif_content_fix
  * on each IFD to fix existing entries, create any new entries that are
  * mandatory but do not yet exist, and remove any entries that are not
