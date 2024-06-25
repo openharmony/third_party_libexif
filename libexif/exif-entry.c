@@ -175,6 +175,38 @@ clear_entry (ExifEntry *e)
 	e->size = 0;
 }
 
+static int
+count_decimal(double num)
+{
+    char str[50];
+    sprintf(str, "%.10f", num);
+    int len = strlen(str);
+    int decimalPlaces = 0;
+    // Start counting from the decimal point
+    int i = len - 1;
+    while (str[i] != '.') {
+        if (str[i] != '0') { // Skip trailing zeros
+            break;
+        }
+        i--;
+    }
+    // Count actual decimal places
+    while (str[i] != '.' && i >= 0) {
+        decimalPlaces++;
+        i--;
+    }
+	return decimalPlaces;
+}
+
+static uint32_t
+gcd_uint32_t(uint32_t a, uint32_t b)
+{
+	if (b == 0) {
+		return a;
+	}
+	return gcd_uint32_t(b, a % b);
+}
+
 /*! Get a value and convert it to an ExifShort.
  * \bug Not all types are converted that could be converted and no indication
  *      is made when that occurs
@@ -1100,10 +1132,30 @@ exif_entry_get_value (ExifEntry *e, char *val, unsigned int maxlen)
 			break;
 		}
 		d = (double) v_rat.numerator / (double) v_rat.denominator;
-		if (d < 1 && d)
-			snprintf (val, maxlen, _("1/%.0f"), 1. / d);
-		else
-			snprintf (val, maxlen, "%.0f", d);
+		int g = gcd_uint32_t(v_rat.numerator, v_rat.denominator);
+		int min_numerator = v_rat.numerator / g;
+		int min_denominator = v_rat.denominator / g;
+		if (d < 1 && d) {
+			int cd = count_decimal(d);
+			if (min_numerator == 1) {
+				if (min_denominator == 2) {
+					snprintf (val, maxlen, _("%.1f"), d);
+				} else {
+					snprintf (val, maxlen, _("%d/%d"), min_numerator, min_denominator);
+				}
+			} else if (cd <= 1) {
+				snprintf (val, maxlen, _("%.1f"), d);
+			} else {
+				snprintf (val, maxlen, _("1/%.0f"), 1. / d);
+			}
+		}
+		else {
+			if (min_denominator == 1) {
+				snprintf (val, maxlen, "%.0f", d);
+			} else {
+				snprintf (val, maxlen, "%.1f", d);
+			}
+		}
 		strncat (val, _(" sec."), maxlen-1 - strlen (val));
 		break;
 	case EXIF_TAG_SHUTTER_SPEED_VALUE:
