@@ -729,6 +729,7 @@ exif_data_save_data_content (ExifData *data, ExifContent *ifd,
 	ExifIfd i;
 	unsigned char *t;
 	unsigned int ts;
+	unsigned int icount = 0;
 
 	if (!data || !data->priv || !ifd || !d || !ds) 
 		return;
@@ -761,6 +762,13 @@ exif_data_save_data_content (ExifData *data, ExifContent *ifd,
 	case EXIF_IFD_1:
 		if (data->size)
 			n_thumb = 2;
+		for (j = 0; j < ifd->count; j++) {
+			if (ifd->entries[j]->tag == EXIF_TAG_JPEG_INTERCHANGE_FORMAT_LENGTH ||
+				ifd->entries[j]->tag == EXIF_TAG_JPEG_INTERCHANGE_FORMAT) {
+				icount++;
+			}
+		}
+		ifd->count = ifd->count - icount;
 		break;
 	case EXIF_IFD_EXIF:
 		if (data->ifd[EXIF_IFD_INTEROPERABILITY]->count)
@@ -795,6 +803,10 @@ exif_data_save_data_content (ExifData *data, ExifContent *ifd,
 		  "Saving %i entries (IFD '%s', offset: %i)...",
 		  ifd->count, exif_ifd_get_name (i), offset);
 	for (j = 0; j < ifd->count; j++) {
+		if (i == EXIF_IFD_1 &&
+			(ifd->entries[j]->tag == EXIF_TAG_JPEG_INTERCHANGE_FORMAT ||
+			ifd->entries[j]->tag == EXIF_TAG_JPEG_INTERCHANGE_FORMAT_LENGTH))
+			continue;
 		if (ifd->entries[j]) {
 			exif_data_save_data_entry (data, ifd->entries[j], d, ds,
 				offset + 12 * j);
