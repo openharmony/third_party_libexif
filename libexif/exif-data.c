@@ -281,28 +281,25 @@ exif_data_save_data_entry (ExifData *data, ExifEntry *e,
 
 	if (!(data->priv->options & EXIF_DATA_OPTION_DONT_CHANGE_MAKER_NOTE)) {
 		/* If this is the maker note tag, update it. */
-		do {
-			if ((e->tag == EXIF_TAG_MAKER_NOTE) && data->priv->md) {
-				if (is_huawei_md(data->priv->md) &&
-					e->data && (e->size >= 8) &&
-					memcmp(e->data, HUAWEI_HEADER, 8))
-					break;
-
-				/* TODO: this is using the wrong ExifMem to free e->data */
-				exif_mem_free (data->priv->mem, e->data);
-				e->data = NULL;
-				e->size = 0;
-				exif_mnote_data_set_offset (data->priv->md, *ds - 6);
-				exif_mnote_data_save (data->priv->md, &e->data, &e->size);
-				e->components = e->size;
-				if (exif_format_get_size (e->format) != 1) {
-					/* e->format is taken from input code,
-					* but we need to make sure it is a 1 byte
-					* entity due to the multiplication below. */
-					e->format = EXIF_FORMAT_UNDEFINED;
+		if ((e->tag == EXIF_TAG_MAKER_NOTE) && data->priv->md) {
+			if (is_huawei_md(data->priv->md) &&
+				e->data && (e->size >= 8) &&
+				!memcmp(e->data, HUAWEI_HEADER, 8)) {
+					/* TODO: this is using the wrong ExifMem to free e->data */
+					exif_mem_free (data->priv->mem, e->data);
+					e->data = NULL;
+					e->size = 0;
+					exif_mnote_data_set_offset (data->priv->md, *ds - 6);
+					exif_mnote_data_save (data->priv->md, &e->data, &e->size);
+					e->components = e->size;
+					if (exif_format_get_size (e->format) != 1) {
+						/* e->format is taken from input code,
+						* but we need to make sure it is a 1 byte
+						* entity due to the multiplication below. */
+						e->format = EXIF_FORMAT_UNDEFINED;
+					}
 				}
-			}
-		} while(0);
+		}
 	}
 
 	exif_set_long  (*d + 6 + offset + 4,
@@ -374,28 +371,25 @@ exif_data_save_data_entry_general (ExifData *data, ExifEntry *e,
 
 	if (!(data->priv->options & EXIF_DATA_OPTION_DONT_CHANGE_MAKER_NOTE)) {
 		/* If this is the maker note tag, update it. */
-		do {
-			if ((e->tag == EXIF_TAG_MAKER_NOTE) && data->priv->md) {
-				if (is_huawei_md(data->priv->md) &&
-					e->data && (e->size >= 8) &&
-					memcmp(e->data, HUAWEI_HEADER, 8))
-					break;
-
-				/* TODO: this is using the wrong ExifMem to free e->data */
-				exif_mem_free(data->priv->mem, e->data);
-				e->data = NULL;
-				e->size = 0;
-				exif_mnote_data_set_offset(data->priv->md, *ds - 6 + JPEG_HEADER_LEN);
-				exif_mnote_data_save(data->priv->md, &e->data, &e->size);
-				e->components = e->size;
-				if (exif_format_get_size(e->format) != 1) {
-					/* e->format is taken from input code,
-					* but we need to make sure it is a 1 byte
-					* entity due to the multiplication below. */
-					e->format = EXIF_FORMAT_UNDEFINED;
+		if ((e->tag == EXIF_TAG_MAKER_NOTE) && data->priv->md) {
+			if (is_huawei_md(data->priv->md) &&
+				e->data && (e->size >= 8) &&
+				!memcmp(e->data, HUAWEI_HEADER, 8)) {
+					/* TODO: this is using the wrong ExifMem to free e->data */
+					exif_mem_free(data->priv->mem, e->data);
+					e->data = NULL;
+					e->size = 0;
+					exif_mnote_data_set_offset(data->priv->md, *ds - 6 + JPEG_HEADER_LEN);
+					exif_mnote_data_save(data->priv->md, &e->data, &e->size);
+					e->components = e->size;
+					if (exif_format_get_size(e->format) != 1) {
+						/* e->format is taken from input code,
+						* but we need to make sure it is a 1 byte
+						* entity due to the multiplication below. */
+						e->format = EXIF_FORMAT_UNDEFINED;
+					}
 				}
-			}
-		} while(0);
+		}
 	}
 
 	exif_set_long(*d + 6 - JPEG_HEADER_LEN + offset + 4,
@@ -735,6 +729,7 @@ exif_data_save_data_content (ExifData *data, ExifContent *ifd,
 	ExifIfd i;
 	unsigned char *t;
 	unsigned int ts;
+	unsigned int icount = 0;
 
 	if (!data || !data->priv || !ifd || !d || !ds) 
 		return;
@@ -767,6 +762,13 @@ exif_data_save_data_content (ExifData *data, ExifContent *ifd,
 	case EXIF_IFD_1:
 		if (data->size)
 			n_thumb = 2;
+		for (j = 0; j < ifd->count; j++) {
+			if (ifd->entries[j]->tag == EXIF_TAG_JPEG_INTERCHANGE_FORMAT_LENGTH ||
+				ifd->entries[j]->tag == EXIF_TAG_JPEG_INTERCHANGE_FORMAT) {
+				icount++;
+			}
+		}
+		ifd->count = ifd->count - icount;
 		break;
 	case EXIF_IFD_EXIF:
 		if (data->ifd[EXIF_IFD_INTEROPERABILITY]->count)
@@ -801,6 +803,10 @@ exif_data_save_data_content (ExifData *data, ExifContent *ifd,
 		  "Saving %i entries (IFD '%s', offset: %i)...",
 		  ifd->count, exif_ifd_get_name (i), offset);
 	for (j = 0; j < ifd->count; j++) {
+		if (i == EXIF_IFD_1 &&
+			(ifd->entries[j]->tag == EXIF_TAG_JPEG_INTERCHANGE_FORMAT ||
+			ifd->entries[j]->tag == EXIF_TAG_JPEG_INTERCHANGE_FORMAT_LENGTH))
+			continue;
 		if (ifd->entries[j]) {
 			exif_data_save_data_entry (data, ifd->entries[j], d, ds,
 				offset + 12 * j);
