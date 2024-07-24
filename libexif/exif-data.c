@@ -228,6 +228,7 @@ exif_data_load_data_entry (ExifData *data, ExifEntry *entry,
 	if (entry->data) {
 		entry->size = s;
 		memcpy (entry->data, d + doff, s);
+        entry->offset = doff;
 	} else {
 		EXIF_LOG_NO_MEMORY(data->priv->log, "ExifData", s);
 		return 0;
