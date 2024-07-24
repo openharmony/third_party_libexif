@@ -646,6 +646,7 @@ exif_entry_dump (ExifEntry *e, unsigned int indent)
 	printf ("%s  Format: %i ('%s')\n", buf, e->format,
 		exif_format_get_name (e->format));
 	printf ("%s  Components: %i\n", buf, (int) e->components);
+    printf ("%s  Offset: %li\n", buf, e->offset);
 	printf ("%s  Size: %i\n", buf, e->size);
 	printf ("%s  Value: %s\n", buf, exif_entry_get_value (e, value, sizeof(value)));
 }

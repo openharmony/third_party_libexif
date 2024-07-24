@@ -62,6 +62,8 @@ struct _ExifEntry {
 	 * than exif_format_get_size(format)*components */
         unsigned int size;
 
+        unsigned long offset;
+
 	/*! #ExifContent containing this entry. 
 	 * \see exif_entry_get_ifd */
 	ExifContent *parent;
