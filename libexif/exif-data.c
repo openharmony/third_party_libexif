@@ -1181,9 +1181,6 @@ interpret_maker_note(ExifData *data, const unsigned char *d, unsigned int ds)
 {
 	int mnoteid;
 	ExifEntry* e = exif_content_get_huawei_makenote_entry(data->ifd[EXIF_IFD_EXIF]);
-	if (!e) {
-		e = exif_data_get_entry (data, EXIF_TAG_MAKER_NOTE);
-	}
 
 	if (!e)
 		return;
