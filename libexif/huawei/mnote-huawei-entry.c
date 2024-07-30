@@ -340,6 +340,14 @@ mnote_huawei_entry_initialize(MnoteHuaweiEntry *e, MnoteHuaweiTag tag, ExifByteO
 		case MNOTE_HUAWEI_ROLL_ANGLE:
 		case MNOTE_HUAWEI_PITCH_ANGLE:
 		case MNOTE_HUAWEI_FOCUS_MODE:
+        case MNOTE_HUAWEI_IS_XMAGE_SUPPORTED:
+        case MNOTE_HUAWEI_XMAGE_MODE:
+        case MNOTE_HUAWEI_XMAGE_LEFT:
+        case MNOTE_HUAWEI_XMAGE_TOP:
+        case MNOTE_HUAWEI_XMAGE_RIGHT:
+        case MNOTE_HUAWEI_XMAGE_BOTTOM:
+        case MNOTE_HUAWEI_CLOUD_ENHANCEMENT_MODE:
+        case MNOTE_HUAWEI_WIND_SNAPSHOT_MODE:
 			e->components = 1;
 			e->format = EXIF_FORMAT_SLONG;
 			e->size = e->components * exif_format_get_size(e->format);
