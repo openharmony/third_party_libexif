@@ -44,7 +44,7 @@ static const MnoteHuaweiTable huawei_table[] = {
     {MNOTE_HUAWEI_XMAGE_BOTTOM, "HwMnoteXmageBottom", N_("Xmage Bottom"), "XmageBottom"},
     {MNOTE_HUAWEI_CLOUD_ENHANCEMENT_MODE, "HwMnoteCloudEnhancementMode", N_("Cloud Enhancement Mode"), "CloudEnhancementMode"},
     {MNOTE_HUAWEI_FOCUS_MODE, "HwMnoteFocusMode", N_("Focus Mode"), "FocusMode"},
-    {MNOTE_HUAWEI_WIND_SNAPSHOT_MODE, "HwMnoteWindSnapShotMode", N_("Wind Snapshot Mode"), "WindSnapshotMode"},
+    {MNOTE_HUAWEI_WIND_SNAPSHOT_MODE, "HwMnoteWindSnapshotMode", N_("Wind Snapshot Mode"), "WindSnapshotMode"},
 	{MNOTE_MOVING_PHOTO_VERSION, "MovingPhotoVersion", N_("Moving Photo Version"),
 	"MovingPhotoVersion"},
 	{MNOTE_MICRO_VIDEO_PRESENTATION_TIMESTAMP_US, "MicroVideoPresentationTimestampUS",
