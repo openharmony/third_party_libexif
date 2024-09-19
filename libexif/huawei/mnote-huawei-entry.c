@@ -36,6 +36,9 @@ mnote_huawei_entry_get_value(MnoteHuaweiEntry *e, char *v, unsigned int maxlen)
 	memset(v, 0, maxlen);
 	int write_pos = 0;
 	ExifLong data = 0;
+    if (e->data == NULL) {
+        return NULL;
+    }
 
 	if (e->format == EXIF_FORMAT_ASCII) {
 		snprintf(v, maxlen, _("%s"), e->data);
