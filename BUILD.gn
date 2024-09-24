@@ -90,6 +90,7 @@ if (defined(ohos_lite)) {  # is on lite Os for ipcamera
   }
 
   ohos_source_set("exif_static") {
+    branch_protector_ret = "pac_ret"
     sources = [
       "//third_party/libexif/libexif/apple/exif-mnote-data-apple.c",
       "//third_party/libexif/libexif/apple/mnote-apple-entry.c",
@@ -141,6 +142,7 @@ if (defined(ohos_lite)) {  # is on lite Os for ipcamera
   }
 
   ohos_shared_library("libexif") {
+    branch_protector_ret = "pac_ret"
     deps = [ ":exif_static" ]
     public_configs = [ ":build_public_config" ]
     install_images = [ system_base_dir ]
