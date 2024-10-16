@@ -26,8 +26,12 @@
 #include <libexif/exif-utils.h>
 #include <libexif/exif-data.h>
 
+#define CHECKOVERFLOW(offset,datasize,structsize) (( offset >= datasize) || (structsize > datasize) || \
+                                                    (offset > datasize - structsize ))
+
 const int DATA_OR_OFFSET = 4;
 const int HUAWEI_HEADER_OFFSET = 8;
+const int MAX_DATA_LOAD_TIMES = 10;
 const char HUAWEI_HEADER[] = { 'H', 'U', 'A', 'W', 'E', 'I', '\0', '\0',
                                0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00};
 
@@ -220,14 +224,25 @@ exif_mnote_data_huawei_save (ExifMnoteData *ne, unsigned char **buf, unsigned in
 
 static int
 exif_mnote_data_huawei_load_data (ExifMnoteData *ne, const unsigned char *buf, unsigned int buf_size,
-								  unsigned int* cur_ifd_data_offset, const unsigned int order_offset)
+								  unsigned int* cur_ifd_data_offset, const unsigned int order_offset,
+                                  unsigned int load_times)
 {
+    if (load_times > MAX_DATA_LOAD_TIMES) {
+        exif_log (ne->log, EXIF_LOG_CODE_CORRUPT_DATA,
+                  "ExifMnoteDataHuawei", "Load times error");
+        return -1;
+    }
 	size_t tcount, offset, ifd_size=0;
 	int ret = 0;
 
 	ExifMnoteDataHuawei *n = (ExifMnoteDataHuawei *) ne;
 	const unsigned char *ifd_data = buf + *cur_ifd_data_offset;
 
+    if (CHECKOVERFLOW(*cur_ifd_data_offset, buf_size, 2)) {
+        exif_log (ne->log, EXIF_LOG_CODE_CORRUPT_DATA,
+                  "ExifMnoteDataHuawei", "Short MakerNote");
+        return -1;
+    }
 	ExifShort count = exif_get_short (ifd_data, n->order);	
 	if (count > 100) {
 		exif_log (ne->log, EXIF_LOG_CODE_CORRUPT_DATA, "ExifMnoteHuawei", "Too much tags (%d) in Huawei MakerNote", count);
@@ -245,7 +260,11 @@ exif_mnote_data_huawei_load_data (ExifMnoteData *ne, const unsigned char *buf, u
 	/* Parse the entries */
 	tcount = 0;
 	for (int i = 0; i < count; i++, offset += 12) {
-		
+        if (CHECKOVERFLOW(*cur_ifd_data_offset + offset, buf_size, 12)) {
+            exif_log (ne->log, EXIF_LOG_CODE_CORRUPT_DATA,
+                      "ExifMnoteDataHuawei", "Short MakerNote");
+            break;
+        }
 		entries[tcount].tag        = exif_get_short (ifd_data + offset, n->order);
 		entries[tcount].format     = exif_get_short (ifd_data + offset + 2, n->order);
 		entries[tcount].components = exif_get_long (ifd_data + offset + 4, n->order);
@@ -264,7 +283,11 @@ exif_mnote_data_huawei_load_data (ExifMnoteData *ne, const unsigned char *buf, u
 
 		size_t t_offset = offset + HUAWEI_HEADER_OFFSET;
 		if (components_size > 4) t_offset = exif_get_long (ifd_data + t_offset, n->order) + HUAWEI_HEADER_OFFSET;
-
+        if (CHECKOVERFLOW(t_offset, buf_size, components_size)) {
+            exif_log (ne->log, EXIF_LOG_CODE_CORRUPT_DATA,
+                      "ExifMnoteDataHuawei", "Tag data past end of buffer");
+            continue;
+        }
 		entries[tcount].data = exif_mem_alloc (ne->mem, components_size);
 		if (!entries[tcount].data) {
 			EXIF_LOG_NO_MEMORY(ne->log, "ExifMnoteHuawei", components_size);
@@ -274,23 +297,30 @@ exif_mnote_data_huawei_load_data (ExifMnoteData *ne, const unsigned char *buf, u
 		unsigned int t_size = 0;
 		if (components_size > 4) {
 			t_size = order_offset + t_offset - HUAWEI_HEADER_OFFSET + components_size;
+            if (CHECKOVERFLOW(t_size, buf_size, components_size)) {
+                exif_log (ne->log, EXIF_LOG_CODE_CORRUPT_DATA,
+                          "ExifMnoteDataHuawei", "Tag data past end of buffer");
+                continue;
+            }
 			memcpy (entries[tcount].data, buf + order_offset + t_offset - HUAWEI_HEADER_OFFSET, components_size);	
 		} else {
-			t_size = (ifd_data - buf) + t_offset + components_size;
+            if (CHECKOVERFLOW(*cur_ifd_data_offset + t_offset, buf_size, components_size)) {
+                exif_log (ne->log, EXIF_LOG_CODE_CORRUPT_DATA,
+                          "ExifMnoteDataHuawei", "Tag data past end of buffer");
+                continue;
+            }
 			memcpy (entries[tcount].data, ifd_data + t_offset, components_size);		
-		}
-
-		//check offset overflow
-		if (t_size > buf_size) {
-			exif_log (ne->log, EXIF_LOG_CODE_CORRUPT_DATA,
-						"ExifMnoteHuawei", "OVERFLOW %d > %d", t_size, buf_size);
-			return -1;
 		}
 
 		MnoteHuaweiTag tag = entries[tcount].tag;
 		if (tag == MNOTE_HUAWEI_SCENE_INFO || tag == MNOTE_HUAWEI_FACE_INFO) {
 
 			*cur_ifd_data_offset = order_offset + exif_get_long (entries[tcount].data, n->order);
+            if (CHECKOVERFLOW(*cur_ifd_data_offset, buf_size, 2)) {
+                exif_log (ne->log, EXIF_LOG_CODE_CORRUPT_DATA,
+                          "ExifMnoteDataHuawei", "Tag data past end of buffer");
+                continue;
+            }
 			ExifMnoteDataHuawei* md = (ExifMnoteDataHuawei*)exif_mnote_data_huawei_new(ne->mem);
 
 			if (!md) {
@@ -301,7 +331,8 @@ exif_mnote_data_huawei_load_data (ExifMnoteData *ne, const unsigned char *buf, u
 			}
 
 			md->order = n->order;
-			ret = exif_mnote_data_huawei_load_data((ExifMnoteData*)md, buf, buf_size, cur_ifd_data_offset, order_offset);
+			ret = exif_mnote_data_huawei_load_data((ExifMnoteData*)md, buf, buf_size,
+                                                   cur_ifd_data_offset, order_offset, ++load_times);
 			if (ret == -1) {
 				exif_log (ne->log, EXIF_LOG_CODE_CORRUPT_DATA,
 				  "ExifMnoteHuawei",
@@ -358,7 +389,8 @@ exif_mnote_data_huawei_load (ExifMnoteData *ne, const unsigned char *buf, unsign
 	exif_mnote_data_huawei_clear (n);
 
 	unsigned int ifd_data_offset= n->offset + head_offset + sizeof(HUAWEI_HEADER);
-	int ret = exif_mnote_data_huawei_load_data(ne, buf, buf_size, &ifd_data_offset, order_offset);
+    unsigned int load_times = 1;
+	int ret = exif_mnote_data_huawei_load_data(ne, buf, buf_size, &ifd_data_offset, order_offset, load_times);
 	if (ret) {
 		exif_log (ne->log, EXIF_LOG_CODE_CORRUPT_DATA,
 			  "ExifMnoteHuawei", "entries exif_mnote_data_huawei_load_ failed");
