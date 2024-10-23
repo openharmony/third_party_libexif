@@ -432,6 +432,7 @@ exif_data_save_data_entry_general (ExifData *data, ExifEntry *e,
 	if (e->data) {
 		unsigned int len = s;
 		if (e->size < s) len = e->size;
+        if (CHECKOVERFLOW(6 - JPEG_HEADER_LEN + doff, *ds, len)) return;
 		memcpy(*d + 6 - JPEG_HEADER_LEN + doff, e->data, len);
 	} else {
 		memset(*d + 6 - JPEG_HEADER_LEN + doff, 0, s);
@@ -512,7 +513,8 @@ load_thumbnail_entry (ExifData *data, ExifTag tag, ExifIfd ifd,
 			* Special case: Tag and format 0. That's against specification
 			* (at least up to 2.2). But Photoshop writes it anyways.
 			*/
-		if (!memcmp (d + offset + 12 * i, "\0\0\0\0", 4)) {
+		if (!d || CHECKOVERFLOW(offset + 12 * i, ds, 4) ||
+            !memcmp (d + offset + 12 * i, "\0\0\0\0", 4)) {
 			exif_log (data->priv->log, EXIF_LOG_CODE_DEBUG, "ExifData",
 					"Skipping empty entry at position %u in '%s'.", i,
 					exif_ifd_get_name (ifd));
