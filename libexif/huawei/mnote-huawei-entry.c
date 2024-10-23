@@ -27,6 +27,8 @@
 #include <libexif/exif-utils.h>
 #include <libexif/i18n.h>
 
+#define DATA_LENGTH 1024
+
 char *
 mnote_huawei_entry_get_value(MnoteHuaweiEntry *e, char *v, unsigned int maxlen)
 {
@@ -34,7 +36,7 @@ mnote_huawei_entry_get_value(MnoteHuaweiEntry *e, char *v, unsigned int maxlen)
 		return NULL;
 
 	memset(v, 0, maxlen);
-	int write_pos = 0;
+    unsigned int write_pos = 0;
 	ExifLong data = 0;
     if (e->data == NULL) {
         return NULL;
@@ -65,7 +67,7 @@ mnote_huawei_entry_get_value(MnoteHuaweiEntry *e, char *v, unsigned int maxlen)
 		if (e->format == EXIF_FORMAT_UNDEFINED) {
 			data = (e->data + i)[0];
 		} else if (e->format == EXIF_FORMAT_SLONG) {
-			data = exif_get_slong(e->data + i * 4, e->order);
+			data = (ExifLong)exif_get_slong(e->data + i * 4, e->order);
 		} else if (e->format == EXIF_FORMAT_LONG) {
 			data = exif_get_long(e->data + i * 4, e->order);
 		} else {
@@ -185,8 +187,9 @@ FINISH:
 int
 mnote_huawei_entry_set_value(MnoteHuaweiEntry *e, const char *v, int strlen)
 {
-	char data[1024] = {0};
-	int increment = 0, components = 0, components_size = 0, ret = 0;
+	char data[DATA_LENGTH] = {0};
+	int increment = 0, ret = 0, components = 0;
+    unsigned int components_size = 0;
 
 	if (!e || !v || e->md) {
 		ret = -1;
@@ -218,7 +221,7 @@ mnote_huawei_entry_set_value(MnoteHuaweiEntry *e, const char *v, int strlen)
 		goto FINISH;
 	}
 
-	components_size = increment * components;
+	components_size = (unsigned int) (increment * components);
 	if (e->size < components_size) {
 		unsigned char *realloc = exif_mem_realloc(e->mem, e->data, components_size);
 		if (!realloc) {
@@ -229,7 +232,11 @@ mnote_huawei_entry_set_value(MnoteHuaweiEntry *e, const char *v, int strlen)
 		e->size = components_size;
 	}
 
-	e->components = components;
+	e->components = (unsigned long)components;
+    if (e->size < components_size || components_size > DATA_LENGTH) {
+        ret = -1;
+        goto FINISH;
+    }
 	memcpy(e->data, data, components_size);
 
 FINISH:
