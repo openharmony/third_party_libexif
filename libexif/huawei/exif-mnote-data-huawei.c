@@ -32,6 +32,7 @@
 const int DATA_OR_OFFSET = 4;
 const int HUAWEI_HEADER_OFFSET = 8;
 const int MAX_DATA_LOAD_TIMES = 10;
+const unsigned int MAX_HUAWEI_MNOTE_ENTRY_NUM = 10 * 1000;
 const char HUAWEI_HEADER[] = { 'H', 'U', 'A', 'W', 'E', 'I', '\0', '\0',
                                0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00};
 
@@ -105,7 +106,10 @@ exif_mnote_data_huawei_malloc_size_data (ExifMnoteData *ne, unsigned int *malloc
 	unsigned int ifd_size = 2 + n->count * 12 + 4;
 	*malloc_size = *malloc_size + ifd_size;
 
-	for (int i = 0; i < n->count; i++) {
+    if (n->count > MAX_HUAWEI_MNOTE_ENTRY_NUM) {
+        return;
+    }
+	for (unsigned int i = 0; i < n->count; i++) {
 		if (n->entries[i].md) {
 			exif_mnote_data_huawei_malloc_size_data(n->entries[i].md, malloc_size);
 			ExifMnoteDataHuawei *t_n = n->entries[i].md;
@@ -143,6 +147,9 @@ exif_mnote_data_huawei_save_data (ExifMnoteData *ne, unsigned char *buf,
 	exif_set_short (buf, n->order, (ExifShort) n->count);
 	
 	/* Save each entry */
+    if (n->count > MAX_HUAWEI_MNOTE_ENTRY_NUM) {
+        return;
+    }
 	for (unsigned int i = 0; i < n->count; i++) {
 		offset = 2 + i * 12;
 		exif_set_short (buf + offset + 0, n->order, (ExifShort) n->entries[i].tag);
@@ -169,11 +176,18 @@ exif_mnote_data_huawei_save_data (ExifMnoteData *ne, unsigned char *buf,
 			exif_set_long (buf + offset, n->order, t_offset);
 
 			// write data			
-			if (n->entries[i].data)
-				memcpy (buf + ifd_data_offset + ifd_data_offset_increment, n->entries[i].data, components_size);
+			if (n->entries[i].data) {
+                if (CHECKOVERFLOW(ifd_data_offset + ifd_data_offset_increment, buf_size, components_size)) {
+                    continue;
+                }
+                memcpy(buf + ifd_data_offset + ifd_data_offset_increment, n->entries[i].data, components_size);
+            }
 			ifd_data_offset_increment += components_size;
 			
 		} else {
+            if (CHECKOVERFLOW(offset, buf_size, components_size)) {
+                continue;
+            }
 			memcpy (buf + offset, n->entries[i].data, components_size);
 		}			
 	}
@@ -236,13 +250,12 @@ exif_mnote_data_huawei_load_data (ExifMnoteData *ne, const unsigned char *buf, u
 	int ret = 0;
 
 	ExifMnoteDataHuawei *n = (ExifMnoteDataHuawei *) ne;
-	const unsigned char *ifd_data = buf + *cur_ifd_data_offset;
-
     if (CHECKOVERFLOW(*cur_ifd_data_offset, buf_size, 2)) {
         exif_log (ne->log, EXIF_LOG_CODE_CORRUPT_DATA,
                   "ExifMnoteDataHuawei", "Short MakerNote");
         return -1;
     }
+	const unsigned char *ifd_data = buf + *cur_ifd_data_offset;
 	ExifShort count = exif_get_short (ifd_data, n->order);	
 	if (count > 100) {
 		exif_log (ne->log, EXIF_LOG_CODE_CORRUPT_DATA, "ExifMnoteHuawei", "Too much tags (%d) in Huawei MakerNote", count);
@@ -371,6 +384,9 @@ exif_mnote_data_huawei_load (ExifMnoteData *ne, const unsigned char *buf, unsign
 		head_offset = 0;
 	}
 
+    if (CHECKOVERFLOW(n->offset + head_offset, buf_size, HUAWEI_HEADER_OFFSET)) {
+        return;
+    }
 	unsigned int order_offset = n->offset + head_offset + HUAWEI_HEADER_OFFSET;
 	const void *pOrder = buf + order_offset;
 
@@ -403,9 +419,12 @@ exif_mnote_data_huawei_count_data (ExifMnoteData *ne, MnoteHuaweiEntryCount* ec)
 {
 	ExifMnoteDataHuawei *n = (ExifMnoteDataHuawei *) ne;
 	if (!ne) return 0;
-	 
+
+    if (n->count > MAX_HUAWEI_MNOTE_ENTRY_NUM) {
+        return 0;
+    }
 	unsigned int count = n->count;
-	for (int i = 0; i < n->count; i++) {
+	for (unsigned int i = 0; i < n->count; i++) {
 		if (ec && (ec->size > ec->idx)) {
 			ec->entries[ec->idx] = &n->entries[i];
 			ec->idx += 1;
@@ -434,7 +453,7 @@ exif_mnote_data_huawei_get_entry_by_tag_data (ExifMnoteDataHuawei *n, int *idx,
 	MnoteHuaweiEntry* entry = NULL;
 	if (!n) return NULL;	
 
-	for (int i = 0; i < n->count; i++) {
+	for (unsigned int i = 0; i < n->count; i++) {
 		if (n->entries[i].tag == tag) {
 			entry = &n->entries[i];
 			break;
@@ -464,7 +483,7 @@ exif_mnote_data_huawei_get_entry_by_index_data (ExifMnoteDataHuawei *n, int *idx
 	MnoteHuaweiEntry* entry = NULL;
 	if (!n) return NULL;	
 
-	for (int i = 0; i < n->count; i++) {
+	for (unsigned int i = 0; i < n->count; i++) {
 		if (*idx == dest_idx) {
 			entry = &n->entries[i];
 			break;
@@ -516,6 +535,7 @@ mnote_huawei_get_entry_count (const ExifMnoteDataHuawei* n, MnoteHuaweiEntryCoun
 	ec->size = count;
 
 	exif_mnote_data_huawei_count_data(ne, ec);
+    if (!entry_count) return;
 	*entry_count = ec;
 }
 
@@ -660,7 +680,7 @@ exif_mnote_data_add_entry (ExifMnoteData *ne, MnoteHuaweiEntry *e)
 		goto Failed;
 	}
 
-	for(int i=0; i<ec->size; i++) {
+	for(unsigned int i=0; i<ec->size; i++) {
 		if(ec->entries[i]->tag == e->tag)
 			find_entry = ec->entries[i];
 		if(ec->entries[i]->tag == owner_tag)
@@ -732,6 +752,9 @@ exif_mnote_data_remove_entry (ExifMnoteData *ne, MnoteHuaweiEntry *e)
 			return;
 		}
 		memcpy (t, parent_md->entries, sizeof (MnoteHuaweiEntry) * (i));
+        if (parent_md->count-i < 1) {
+            return;
+        }
 		unsigned int tail_count = parent_md->count-i-1;
 		if (tail_count)
 			memcpy (&t[i], &parent_md->entries[i+1], sizeof (MnoteHuaweiEntry) * (tail_count));
@@ -752,7 +775,8 @@ exif_mnote_data_huawei_identify (const ExifData *ed, const ExifEntry *e)
 {
 	int ret = 0;
 
-	if (!e && e->size < sizeof(HUAWEI_HEADER)) return ret;
+	if (!e || e->size < sizeof(HUAWEI_HEADER) || !e->data)
+        return ret;
 	ret = !memcmp(e->data, HUAWEI_HEADER, 8);
 
 	return ret;
@@ -805,10 +829,10 @@ memory_dump(const void *ptr, int len)
 void
 print_huawei_md(const ExifMnoteDataHuawei *n)
 {
-	printf("ifd_tag: %04X, count:%d, ifd_pos:%p, ifd_size:%d\n", n->ifd_tag, n->count, n, n->ifd_size);
+	printf("ifd_tag: %04X, count:%u, ifd_size:%u\n", n->ifd_tag, n->count, n->ifd_size);
 	MnoteHuaweiEntry *entries = n->entries;
 	for (int i=0; i<n->count; i++) {
-		printf("idx:%d, tag: %04X, type: %d, components:%ld\n", i, entries[i].tag, entries[i].format, entries[i].components);
+		printf("idx:%d, tag: %04X, type: %d, components:%lu\n", i, entries[i].tag, entries[i].format, entries[i].components);
 		memory_dump(entries[i].data, entries[i].size);
 		if (entries[i].md) {
 			print_huawei_md((ExifMnoteDataHuawei*) entries[i].md);
