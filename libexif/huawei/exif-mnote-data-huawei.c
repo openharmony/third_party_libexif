@@ -175,11 +175,11 @@ exif_mnote_data_huawei_save_data (ExifMnoteData *ne, unsigned char *buf,
 			// write data offset
 			exif_set_long (buf + offset, n->order, t_offset);
 
-			// write data			
+			// write data
+            if (CHECKOVERFLOW(ifd_data_offset + ifd_data_offset_increment, buf_size, components_size)) {
+                continue;
+            }
 			if (n->entries[i].data) {
-                if (CHECKOVERFLOW(ifd_data_offset + ifd_data_offset_increment, buf_size, components_size)) {
-                    continue;
-                }
                 memcpy(buf + ifd_data_offset + ifd_data_offset_increment, n->entries[i].data, components_size);
             }
 			ifd_data_offset_increment += components_size;
@@ -535,7 +535,9 @@ mnote_huawei_get_entry_count (const ExifMnoteDataHuawei* n, MnoteHuaweiEntryCoun
 	ec->size = count;
 
 	exif_mnote_data_huawei_count_data(ne, ec);
-    if (!entry_count) return;
+    if (!entry_count) {
+        return;
+    }
 	*entry_count = ec;
 }
 
