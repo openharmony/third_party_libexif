@@ -434,7 +434,9 @@ exif_data_save_data_entry_general (ExifData *data, ExifEntry *e,
 	if (e->data) {
 		unsigned int len = s;
 		if (e->size < s) len = e->size;
-        if (CHECKOVERFLOW(6 - JPEG_HEADER_LEN + doff, *ds, len)) return;
+        if (!d || !(*d) || CHECKOVERFLOW(6 - JPEG_HEADER_LEN + doff, *ds, len)) {
+            return;
+        }
 		memcpy(*d + 6 - JPEG_HEADER_LEN + doff, e->data, len);
 	} else {
 		memset(*d + 6 - JPEG_HEADER_LEN + doff, 0, s);
