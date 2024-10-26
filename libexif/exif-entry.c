@@ -1503,7 +1503,9 @@ void exif_entry_initialize_gps(ExifEntry *e, ExifTag tag) {
       return;
     }
     if(hasDefault) {
-      if (e->size < info->default_size) return;
+      if (e->size < info->default_size) {
+          return;
+      }
       memcpy(e->data, info->default_value, info->default_size);
     }
   }
