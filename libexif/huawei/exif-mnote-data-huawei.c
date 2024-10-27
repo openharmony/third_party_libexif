@@ -384,10 +384,10 @@ exif_mnote_data_huawei_load (ExifMnoteData *ne, const unsigned char *buf, unsign
 		head_offset = 0;
 	}
 
-    if (CHECKOVERFLOW(n->offset + head_offset, buf_size, HUAWEI_HEADER_OFFSET)) {
+	unsigned int order_offset = n->offset + head_offset + HUAWEI_HEADER_OFFSET;
+    if (CHECKOVERFLOW(order_offset, buf_size, 2)) {
         return;
     }
-	unsigned int order_offset = n->offset + head_offset + HUAWEI_HEADER_OFFSET;
 	const void *pOrder = buf + order_offset;
 
 	//read order
@@ -522,7 +522,7 @@ mnote_huawei_get_entry_count (const ExifMnoteDataHuawei* n, MnoteHuaweiEntryCoun
 	MnoteHuaweiEntryCount* ec = exif_huawei_entry_count_new();
 
 	unsigned int count = exif_mnote_data_huawei_count_data(ne, NULL);
-	if (!count) {
+	if (!count || !ec) {
 		mnote_huawei_free_entry_count(ec);
 		return;
 	}
