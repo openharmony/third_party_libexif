@@ -148,7 +148,7 @@ exif_entry_ref (ExifEntry *e)
 void
 exif_entry_unref (ExifEntry *e)
 {
-	if (!e) return;
+	if (!e || !e->priv) return;
 
 	e->priv->ref_count--;
 	if (!e->priv->ref_count)
