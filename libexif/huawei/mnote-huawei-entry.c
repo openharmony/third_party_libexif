@@ -52,10 +52,10 @@ mnote_huawei_entry_get_value(MnoteHuaweiEntry *e, char *v, unsigned int maxlen)
 			int offset = i * exif_format_get_size(e->format);
 			ExifRational r = exif_get_rational(e->data + offset, e->order);
 			if (r.denominator == 0) {
-				write_pos += snprintf(v + write_pos, maxlen - write_pos, "%u ",
+				write_pos += (unsigned int)snprintf(v + write_pos, maxlen - write_pos, "%u ",
 									  r.numerator);
 			} else {
-				write_pos += snprintf(v + write_pos, maxlen - write_pos, "%u%u ",
+				write_pos += (unsigned int)snprintf(v + write_pos, maxlen - write_pos, "%u%u ",
 									  r.numerator, r.denominator);
 			}
 		}
@@ -86,7 +86,7 @@ int
 mnote_huawei_entry_rational_timestamp_process(char *buff, const int buff_size, const char *v, int strlen,
 									 		   int *components, ExifMem *mem, ExifByteOrder order)
 {
-	char *token = NULL, *pv = NULL;
+	char *timestamp_char = NULL, *pv = NULL;
 	int components_local = 0, components_size = 0, ret = 0;
 	const int increment = 8;
 
@@ -98,14 +98,14 @@ mnote_huawei_entry_rational_timestamp_process(char *buff, const int buff_size, c
 	*(pv + strlen) = 0;
 	memcpy(pv, v, strlen);
 
-	token = strtok(pv, " ");
-	for (; token && components_size < buff_size;) {
+    timestamp_char = strtok(pv, " ");
+	for (; timestamp_char && components_size < buff_size;) {
 		int offset = increment * components_local;
 		char timestamp_buff[11] = {0};
-		snprintf(timestamp_buff, sizeof(timestamp_buff), "%s", token);
+		snprintf(timestamp_buff, sizeof(timestamp_buff), "%s", timestamp_char);
 		unsigned long numerator = strtoul(timestamp_buff, NULL, 10);
 
-		snprintf(timestamp_buff, 8, "%s", token+10);
+		snprintf(timestamp_buff, 8, "%s", timestamp_char+10);
 		unsigned long denominator = strtoul(timestamp_buff, NULL, 10);
 
 		ExifRational r = {
@@ -116,7 +116,7 @@ mnote_huawei_entry_rational_timestamp_process(char *buff, const int buff_size, c
 		exif_set_rational((unsigned char*)buff + offset, order, r);
 		components_local++;
 		components_size = components_local * increment;
-		token = strtok(NULL, " ");
+        timestamp_char = strtok(NULL, " ");
 	}
 
 FINISH:
