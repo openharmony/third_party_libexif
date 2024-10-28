@@ -644,8 +644,8 @@ exif_entry_dump (ExifEntry *e, unsigned int indent)
 	printf ("%s  Format: %i ('%s')\n", buf, e->format,
 		exif_format_get_name (e->format));
 	printf ("%s  Components: %i\n", buf, (int) e->components);
-    printf ("%s  Offset: %li\n", buf, e->offset);
-	printf ("%s  Size: %i\n", buf, e->size);
+    printf ("%s  Offset: %lu\n", buf, e->offset);
+	printf ("%s  Size: %u\n", buf, e->size);
 	printf ("%s  Value: %s\n", buf, exif_entry_get_value (e, value, sizeof(value)));
 }
 
@@ -1133,9 +1133,9 @@ exif_entry_get_value (ExifEntry *e, char *val, unsigned int maxlen)
 			break;
 		}
 		d = (double) v_rat.numerator / (double) v_rat.denominator;
-		int g = gcd_uint32_t(v_rat.numerator, v_rat.denominator);
-		int min_numerator = v_rat.numerator / g;
-		int min_denominator = v_rat.denominator / g;
+		unsigned int g = gcd_uint32_t(v_rat.numerator, v_rat.denominator);
+		unsigned int min_numerator = v_rat.numerator / g;
+		unsigned int min_denominator = v_rat.denominator / g;
 		if (d < 1 && d) {
 			int cd = count_decimal(d);
 			if (min_numerator == 1) {
@@ -1494,7 +1494,7 @@ void exif_entry_initialize_gps(ExifEntry *e, ExifTag tag) {
     e->data = NULL;
   } else {
     int hasDefault = (info->default_size && info->default_value);
-    int allocSize = hasDefault ? info->default_size : (exif_format_get_size (e->format) * e->components);
+    unsigned int allocSize = hasDefault ? info->default_size : (exif_format_get_size (e->format) * e->components);
     e->size = allocSize;
     e->data = exif_entry_alloc (e, e->size);
     if(!e->data) {
@@ -1502,6 +1502,7 @@ void exif_entry_initialize_gps(ExifEntry *e, ExifTag tag) {
       return;
     }
     if(hasDefault) {
+      if (e->size < info->default_size) return;
       memcpy(e->data, info->default_value, info->default_size);
     }
   }
