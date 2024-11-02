@@ -48,8 +48,8 @@ mnote_huawei_entry_get_value(MnoteHuaweiEntry *e, char *v, unsigned int maxlen)
 	}
 
 	if (e->tag == MNOTE_MICRO_VIDEO_PRESENTATION_TIMESTAMP_US) {
-		for (int i = 0; i < e->components && write_pos < maxlen; i++) {
-			int offset = i * exif_format_get_size(e->format);
+		for (unsigned long i = 0; i < e->components && write_pos < maxlen; i++) {
+			unsigned long offset = i * exif_format_get_size(e->format);
 			ExifRational r = exif_get_rational(e->data + offset, e->order);
 			if (r.denominator == 0) {
 				write_pos += (unsigned int)snprintf(v + write_pos, maxlen - write_pos, "%u ",
@@ -63,7 +63,7 @@ mnote_huawei_entry_get_value(MnoteHuaweiEntry *e, char *v, unsigned int maxlen)
 		return v;
 	}
 
-	for (int i = 0; i < e->components && write_pos < maxlen; i++) {
+	for (unsigned long i = 0; i < e->components && write_pos < maxlen; i++) {
 		if (e->format == EXIF_FORMAT_UNDEFINED) {
 			data = (e->data + i)[0];
 		} else if (e->format == EXIF_FORMAT_SLONG) {
@@ -75,7 +75,7 @@ mnote_huawei_entry_get_value(MnoteHuaweiEntry *e, char *v, unsigned int maxlen)
 			return NULL;
 		}
 
-		write_pos += snprintf(v + write_pos, maxlen - write_pos, "%d ", data);
+		write_pos += (unsigned int)snprintf(v + write_pos, maxlen - write_pos, "%u ", data);
 	}
 
 	*(v + write_pos - 1) = 0;
