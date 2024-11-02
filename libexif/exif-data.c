@@ -1624,7 +1624,7 @@ exif_data_ref (ExifData *data)
 void
 exif_data_unref (ExifData *data)
 {
-	if (!data) 
+	if (!data || !data->priv)
 		return;
 
 	data->priv->ref_count--;
