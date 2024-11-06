@@ -87,7 +87,7 @@ exif_content_ref (ExifContent *content)
 void
 exif_content_unref (ExifContent *content)
 {
-	if (!content)
+	if (!content || !content->priv)
 		return;
 
 	content->priv->ref_count--;
