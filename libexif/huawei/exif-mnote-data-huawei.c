@@ -326,7 +326,7 @@ exif_mnote_data_huawei_load_data (ExifMnoteData *ne, const unsigned char *buf, u
 		}
 
 		MnoteHuaweiTag tag = entries[tcount].tag;
-		if (tag == MNOTE_HUAWEI_SCENE_INFO || tag == MNOTE_HUAWEI_FACE_INFO) {
+		if ((tag == MNOTE_HUAWEI_SCENE_INFO || tag == MNOTE_HUAWEI_FACE_INFO) && components_size >= 4) {
 
 			*cur_ifd_data_offset = order_offset + exif_get_long (entries[tcount].data, n->order);
             if (CHECKOVERFLOW(*cur_ifd_data_offset, buf_size, 2)) {
