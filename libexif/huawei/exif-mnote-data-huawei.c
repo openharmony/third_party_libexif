@@ -95,7 +95,7 @@ exif_mnote_data_huawei_set_offset (ExifMnoteData *n, unsigned int o)
 static void
 exif_mnote_data_huawei_malloc_size_data (ExifMnoteData *ne, unsigned int *malloc_size)
 {
-	
+	if (!ne) return;
 	ExifMnoteDataHuawei *n = (ExifMnoteDataHuawei *) ne;
 	if (!n) {
 		exif_log (ne->log, EXIF_LOG_CODE_CORRUPT_DATA, "ExifMnoteHuawei", "n is NULL");
@@ -370,6 +370,7 @@ exif_mnote_data_huawei_load_data (ExifMnoteData *ne, const unsigned char *buf, u
 static void
 exif_mnote_data_huawei_load (ExifMnoteData *ne, const unsigned char *buf, unsigned int buf_size)
 {
+    if (!ne) return;
 	unsigned int head_offset = 6;
 	ExifMnoteDataHuawei *n = (ExifMnoteDataHuawei *) ne;
 	if (!n || !buf || !buf_size) {
@@ -666,14 +667,13 @@ exif_mnote_data_add_entry (ExifMnoteData *ne, MnoteHuaweiEntry *e)
 	ExifMnoteDataHuawei *n = (ExifMnoteDataHuawei *) ne;
 	MnoteHuaweiEntry *find_entry = NULL, *add_entry=NULL;
 	ExifMnoteDataHuawei *parent_md = NULL;
-	MnoteHuaweiTag owner_tag = get_tag_owner_tag(e->tag);
 	MnoteHuaweiEntryCount *ec = NULL;
 
 	if(!is_huawei_md(ne) || (n->ifd_tag != MNOTE_HUAWEI_INFO) || !e) {
 		ret = -1;
 		goto Failed;
 	}
-
+    MnoteHuaweiTag owner_tag = get_tag_owner_tag(e->tag);
 	if (owner_tag == MNOTE_HUAWEI_INFO)
 		parent_md = n;
 	mnote_huawei_get_entry_count(n, &ec);
@@ -734,7 +734,7 @@ exif_mnote_data_remove_entry (ExifMnoteData *ne, MnoteHuaweiEntry *e)
 		return;
 
 	MnoteHuaweiEntry *find_entry = exif_mnote_data_huawei_get_entry_by_tag(n, e->tag);
-	if (find_entry != e)
+	if (find_entry != e || !find_entry)
 		return;
 
 	ExifMnoteDataHuawei *parent_md = find_entry->parent_md;
