@@ -1,9 +1,9 @@
 [
   {
-    "Name": "libexif",
+    "Name": "EXIF Tag Parsing Library - libexif",
     "License": "LGPL-2.1+",
     "License File": "COPYING",
-    "Version Number": "0.6.24",
+    "Version Number": "v0.6.24",
     "Upstream URL": "https://github.com/libexif/libexif/releases/tag/v0.6.24",
     "Description": "The exif base library"
   }
