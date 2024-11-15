@@ -241,18 +241,13 @@ exif_mnote_data_huawei_load_data (ExifMnoteData *ne, const unsigned char *buf, u
 								  unsigned int* cur_ifd_data_offset, const unsigned int order_offset,
                                   unsigned int load_times)
 {
-    if (load_times > MAX_DATA_LOAD_TIMES) {
-        exif_log (ne->log, EXIF_LOG_CODE_CORRUPT_DATA,
-                  "ExifMnoteDataHuawei", "Load times error");
-        return -1;
-    }
 	size_t tcount, offset, ifd_size=0;
 	int ret = 0;
 
 	ExifMnoteDataHuawei *n = (ExifMnoteDataHuawei *) ne;
-    if (CHECKOVERFLOW(*cur_ifd_data_offset, buf_size, 2)) {
+    if (CHECKOVERFLOW(*cur_ifd_data_offset, buf_size, 2) || load_times > MAX_DATA_LOAD_TIMES) {
         exif_log (ne->log, EXIF_LOG_CODE_CORRUPT_DATA,
-                  "ExifMnoteDataHuawei", "Short MakerNote");
+                  "ExifMnoteDataHuawei", "MakerNote data is abnormal.");
         return -1;
     }
 	const unsigned char *ifd_data = buf + *cur_ifd_data_offset;
@@ -326,7 +321,8 @@ exif_mnote_data_huawei_load_data (ExifMnoteData *ne, const unsigned char *buf, u
 		}
 
 		MnoteHuaweiTag tag = entries[tcount].tag;
-		if (tag == MNOTE_HUAWEI_SCENE_INFO || tag == MNOTE_HUAWEI_FACE_INFO) {
+        int needLoadData = (tag == MNOTE_HUAWEI_SCENE_INFO || tag == MNOTE_HUAWEI_FACE_INFO) && components_size >= 4;
+		if (needLoadData) {
 
 			*cur_ifd_data_offset = order_offset + exif_get_long (entries[tcount].data, n->order);
             if (CHECKOVERFLOW(*cur_ifd_data_offset, buf_size, 2)) {
