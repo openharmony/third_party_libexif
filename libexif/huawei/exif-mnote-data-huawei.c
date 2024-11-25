@@ -728,8 +728,9 @@ exif_mnote_data_remove_entry (ExifMnoteData *ne, MnoteHuaweiEntry *e)
 		return;
 
 	MnoteHuaweiEntry *find_entry = exif_mnote_data_huawei_get_entry_by_tag(n, e->tag);
-	if (find_entry != e || !find_entry)
-		return;
+	if (find_entry != e || !find_entry) {
+        return;
+    }
 
 	ExifMnoteDataHuawei *parent_md = find_entry->parent_md;
 
