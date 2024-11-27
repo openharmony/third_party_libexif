@@ -250,7 +250,8 @@ exif_mnote_data_huawei_load_data (ExifMnoteData *ne, const unsigned char *buf, u
                   "ExifMnoteDataHuawei", "MakerNote data is abnormal.");
         return -1;
     }
-	const unsigned char *ifd_data = buf + *cur_ifd_data_offset;
+    unsigned int current_offset = *cur_ifd_data_offset;
+	const unsigned char *ifd_data = buf + current_offset;
 	ExifShort count = exif_get_short (ifd_data, n->order);	
 	if (count > 100) {
 		exif_log (ne->log, EXIF_LOG_CODE_CORRUPT_DATA, "ExifMnoteHuawei", "Too much tags (%d) in Huawei MakerNote", count);
@@ -268,7 +269,7 @@ exif_mnote_data_huawei_load_data (ExifMnoteData *ne, const unsigned char *buf, u
 	/* Parse the entries */
 	tcount = 0;
 	for (int i = 0; i < count; i++, offset += 12) {
-        if (CHECKOVERFLOW(*cur_ifd_data_offset + offset, buf_size, 12)) {
+        if (CHECKOVERFLOW(current_offset + offset, buf_size, 12)) {
             exif_log (ne->log, EXIF_LOG_CODE_CORRUPT_DATA,
                       "ExifMnoteDataHuawei", "Short MakerNote");
             break;
