@@ -37,7 +37,6 @@ mnote_huawei_entry_get_value(MnoteHuaweiEntry *e, char *v, unsigned int maxlen)
 
 	memset(v, 0, maxlen);
     unsigned int write_pos = 0;
-	ExifLong data = 0;
     if (e->data == NULL) {
         return NULL;
     }
@@ -65,17 +64,21 @@ mnote_huawei_entry_get_value(MnoteHuaweiEntry *e, char *v, unsigned int maxlen)
 
 	for (unsigned long i = 0; i < e->components && write_pos < maxlen; i++) {
 		if (e->format == EXIF_FORMAT_UNDEFINED) {
+            ExifLong data = 0;
 			data = (e->data + i)[0];
+            write_pos += (unsigned int)snprintf(v + write_pos, maxlen - write_pos, "%u ", data);
 		} else if (e->format == EXIF_FORMAT_SLONG) {
-			data = (ExifLong)exif_get_slong(e->data + i * 4, e->order);
+            ExifSLong data = 0;
+			data = exif_get_slong(e->data + i * 4, e->order);
+            write_pos += (unsigned int)snprintf(v + write_pos, maxlen - write_pos, "%d ", data);
 		} else if (e->format == EXIF_FORMAT_LONG) {
+            ExifSLong data = 0;
 			data = exif_get_long(e->data + i * 4, e->order);
+            write_pos += (unsigned int)snprintf(v + write_pos, maxlen - write_pos, "%u ", data);
 		} else {
 			snprintf(v, maxlen, _("unsupported data types: %d"), e->format);
 			return NULL;
 		}
-
-		write_pos += (unsigned int)snprintf(v + write_pos, maxlen - write_pos, "%u ", data);
 	}
 
 	*(v + write_pos - 1) = 0;
