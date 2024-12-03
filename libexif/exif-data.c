@@ -945,8 +945,10 @@ exif_data_save_data_content (ExifData *data, ExifContent *ifd,
 		 * IFD 1.
 		 */
 		exif_set_long (*d + 6 + offset, data->priv->order, *ds - 6);
-		exif_data_save_data_content (data, data->ifd[EXIF_IFD_1], d, ds,
-					     *ds - 6);
+        if (data && data->remove_thumbnail != 1) {
+            exif_data_save_data_content (data, data->ifd[EXIF_IFD_1], d, ds,
+                                         *ds - 6);
+        }
 	} else
 		exif_set_long (*d + 6 + offset, data->priv->order, 0);
 }
