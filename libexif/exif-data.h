@@ -55,6 +55,8 @@ struct _ExifData
 	unsigned int size;
 
 	ExifDataPrivate *priv;
+
+    unsigned int remove_thumbnail;
 };
 
 /*! Allocate a new #ExifData. The #ExifData contains an empty
