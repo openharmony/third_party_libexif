@@ -50,6 +50,7 @@ static const MnoteHuaweiTable huawei_table[] = {
 	{MNOTE_MICRO_VIDEO_PRESENTATION_TIMESTAMP_US, "MicroVideoPresentationTimestampUS",
 	N_("Video Presentation Timestamp US"), "VideoPresentationTimestampUS"},
     {MNOTE_MOVING_PHOTO_ID, "MovingPhotoId", N_("Moving Photo Id"), "MovingPhotoId"},
+    {MNOTE_HUAWEI_AI_EDIT, "HwMnoteAIEdit", N_("AI Edit"), "AIEdit"},
 
 	{0, "HwUnknow", N_("Unknow Tag"), "UnknowTag"},
 };
