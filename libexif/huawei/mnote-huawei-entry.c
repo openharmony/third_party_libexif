@@ -358,6 +358,7 @@ mnote_huawei_entry_initialize(MnoteHuaweiEntry *e, MnoteHuaweiTag tag, ExifByteO
         case MNOTE_HUAWEI_XMAGE_BOTTOM:
         case MNOTE_HUAWEI_CLOUD_ENHANCEMENT_MODE:
         case MNOTE_HUAWEI_WIND_SNAPSHOT_MODE:
+        case MNOTE_HUAWEI_AI_EDIT:
 			e->components = 1;
 			e->format = EXIF_FORMAT_SLONG;
 			e->size = e->components * exif_format_get_size(e->format);
