@@ -28,8 +28,11 @@
 #include <libexif/i18n.h>
 
 #define DATA_LENGTH 1024
-#define TERMINAL_SIZE 1
 
+// Get Integer Length
+int getIntLength(int value) {
+    return value == 0 ? 1 : (int)log10(abs(value)) + 1;
+}
 
 char *
 mnote_huawei_entry_get_value(MnoteHuaweiEntry *e, char *v, unsigned int maxlen)
@@ -68,7 +71,8 @@ mnote_huawei_entry_get_value(MnoteHuaweiEntry *e, char *v, unsigned int maxlen)
 		if (e->format == EXIF_FORMAT_UNDEFINED) {
             ExifLong data = 0;
 			data = (e->data + i)[0];
-			if ((sizeof(ExifLong) + TERMINAL_SIZE) > (maxlen - write_pos)) {
+			// 1 for end of the string
+			if ((getIntLength(data) + 1) > (maxlen - write_pos)) {
 				continue;
 			}
 			int returnSize = snprintf(v + write_pos, maxlen - write_pos, "%u ", data);
@@ -79,7 +83,7 @@ mnote_huawei_entry_get_value(MnoteHuaweiEntry *e, char *v, unsigned int maxlen)
 		} else if (e->format == EXIF_FORMAT_SLONG) {
             ExifSLong data = 0;
             data = exif_get_slong(e->data + i * sizeof(ExifSLong), e->order);
-			if ((sizeof(ExifLong) + TERMINAL_SIZE) > (maxlen - write_pos)) {
+			if ((getIntLength(data) + 1) > (maxlen - write_pos)) {
 				continue;
 			}
 			int returnSize = snprintf(v + write_pos, maxlen - write_pos, "%d ", data);
@@ -90,7 +94,7 @@ mnote_huawei_entry_get_value(MnoteHuaweiEntry *e, char *v, unsigned int maxlen)
 		} else if (e->format == EXIF_FORMAT_LONG) {
             ExifLong data = 0;
 			data = exif_get_long(e->data + i * sizeof(ExifLong), e->order);
-			if ((sizeof(ExifLong) + TERMINAL_SIZE) > (maxlen - write_pos)) {
+			if ((getIntLength(data) + 1) > (maxlen - write_pos)) {
 				continue;
 			}
 			int returnSize = snprintf(v + write_pos, maxlen - write_pos, "%u ", data);
