@@ -29,9 +29,12 @@
 
 #define DATA_LENGTH 1024
 
-// Get Integer Length
-int getIntLength(int value) {
-    return value == 0 ? 1 : (int)log10(abs(value)) + 1;
+// Get Length of Number for Value
+uint32_t getIntLength(uint32_t value) {
+    if (value == 0) {
+        return 1;
+    }
+    return (uint32_t)log10(value) + 1;
 }
 
 char *
