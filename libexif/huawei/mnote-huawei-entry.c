@@ -31,7 +31,7 @@
 #define BLANK_SIZE 1 // 1 for end of the string
 
 // Get Length of Number for Value in Unsigned Integer
-uint32_t getUnsignedIntLength(uint32_t value) {
+uint32_t get_unsigned_int_length(uint32_t value) {
     if (value == 0) {
         return 1;
     }
@@ -39,7 +39,7 @@ uint32_t getUnsignedIntLength(uint32_t value) {
 }
 
 // Get Length of Number for Value in Signed Integer
-int32_t getSignedIntLength(int32_t value) {
+int32_t get_signed_int_length(int32_t value) {
     if (value == 0) {
         return 1;
     }
@@ -84,7 +84,7 @@ mnote_huawei_entry_get_value(MnoteHuaweiEntry *e, char *v, unsigned int maxlen)
 		if (e->format == EXIF_FORMAT_UNDEFINED) {
             ExifLong data = 0;
 			data = (e->data + i)[0];
-			if ((getUnsignedIntLength(data) + BLANK_SIZE) > (maxlen - write_pos)) {
+			if ((get_unsigned_int_length(data) + BLANK_SIZE) > (maxlen - write_pos)) {
 				continue;
 			}
 			int returnSize = snprintf(v + write_pos, maxlen - write_pos, "%u ", data);
@@ -95,7 +95,7 @@ mnote_huawei_entry_get_value(MnoteHuaweiEntry *e, char *v, unsigned int maxlen)
 		} else if (e->format == EXIF_FORMAT_SLONG) {
             ExifSLong data = 0;
             data = exif_get_slong(e->data + i * sizeof(ExifSLong), e->order);
-			if ((getSignedIntLength(data) + BLANK_SIZE) > (maxlen - write_pos)) {
+			if ((get_signed_int_length(data) + BLANK_SIZE) > (maxlen - write_pos)) {
 				continue;
 			}
 			int returnSize = snprintf(v + write_pos, maxlen - write_pos, "%d ", data);
@@ -106,7 +106,7 @@ mnote_huawei_entry_get_value(MnoteHuaweiEntry *e, char *v, unsigned int maxlen)
 		} else if (e->format == EXIF_FORMAT_LONG) {
             ExifLong data = 0;
 			data = exif_get_long(e->data + i * sizeof(ExifLong), e->order);
-			if ((getUnsignedIntLength(data) + BLANK_SIZE) > (maxlen - write_pos)) {
+			if ((get_unsigned_int_length(data) + BLANK_SIZE) > (maxlen - write_pos)) {
 				continue;
 			}
 			int returnSize = snprintf(v + write_pos, maxlen - write_pos, "%u ", data);
