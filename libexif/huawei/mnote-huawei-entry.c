@@ -28,9 +28,9 @@
 #include <libexif/i18n.h>
 
 #define DATA_LENGTH 1024
-#define BLANK_SIZE 1 // 1 for end of the string
+#define BLANK_SIZE 1 /* One for end of the string */
 
-// Get Length of Number for Value in Unsigned Integer
+/* Get length of number for value in unsigned integer */
 uint32_t get_unsigned_int_length(uint32_t value) {
     if (value == 0) {
         return 1;
@@ -38,12 +38,12 @@ uint32_t get_unsigned_int_length(uint32_t value) {
     return (uint32_t)log10(value) + 1;
 }
 
-// Get Length of Number for Value in Signed Integer
+/* Get length of number for value in signed integer */
 int32_t get_signed_int_length(int32_t value) {
     if (value == 0) {
         return 1;
     }
-    // If the number is negative, include the '-' sign in the length
+    /* If the number is negative, include the '-' sign in the length */
     return (int32_t)log10(abs(value)) + (value < 0 ? 2 : 1);
 }
 
