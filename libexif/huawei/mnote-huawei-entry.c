@@ -43,6 +43,7 @@ int32_t get_signed_int_length(int32_t value) {
     if (value == 0) {
         return 1;
     }
+	
     /* If the number is negative, include the '-' sign in the length */
     return (int32_t)log10(abs(value)) + (value < 0 ? 2 : 1);
 }
