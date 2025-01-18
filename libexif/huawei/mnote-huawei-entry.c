@@ -39,13 +39,13 @@ uint32_t get_unsigned_int_length(uint32_t value) {
 }
 
 /* Get length of number for value in signed integer */
-int32_t get_signed_int_length(int32_t value) {
+uint32_t get_signed_int_length(int32_t value) {
     if (value == 0) {
         return 1;
     }
-	
+
     /* If the number is negative, include the '-' sign in the length */
-    return (int32_t)log10(abs(value)) + (value < 0 ? 2 : 1);
+    return (uint32_t)log10(abs(value)) + (value < 0 ? 2 : 1);
 }
 
 char *
