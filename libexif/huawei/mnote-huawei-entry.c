@@ -28,7 +28,7 @@
 #include <libexif/i18n.h>
 
 #define DATA_LENGTH 1024
-#define BLANK_SIZE 1 /* One for end of the string */
+#define BLANK_SIZE 1
 
 /* Get length of number for value in unsigned integer */
 uint32_t get_unsigned_int_length(uint32_t value) {
