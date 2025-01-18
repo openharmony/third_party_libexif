@@ -86,33 +86,33 @@ mnote_huawei_entry_get_value(MnoteHuaweiEntry *e, char *v, unsigned int maxlen)
             ExifLong data = 0;
 			data = (e->data + i)[0];
 			if ((get_unsigned_int_length(data) + BLANK_SIZE) > (maxlen - write_pos)) {
-				continue;
+				return NULL;
 			}
 			int returnSize = snprintf(v + write_pos, maxlen - write_pos, "%u ", data);
 			if (returnSize < 0) {
-				continue;
+				return NULL;
 			}
 			write_pos += (unsigned int)returnSize;
 		} else if (e->format == EXIF_FORMAT_SLONG) {
             ExifSLong data = 0;
             data = exif_get_slong(e->data + i * sizeof(ExifSLong), e->order);
 			if ((get_signed_int_length(data) + BLANK_SIZE) > (maxlen - write_pos)) {
-				continue;
+				return NULL;
 			}
 			int returnSize = snprintf(v + write_pos, maxlen - write_pos, "%d ", data);
 			if (returnSize < 0) {
-				continue;
+				return NULL;
 			}
 			write_pos += (unsigned int)returnSize;
 		} else if (e->format == EXIF_FORMAT_LONG) {
             ExifLong data = 0;
 			data = exif_get_long(e->data + i * sizeof(ExifLong), e->order);
 			if ((get_unsigned_int_length(data) + BLANK_SIZE) > (maxlen - write_pos)) {
-				continue;
+				return NULL;
 			}
 			int returnSize = snprintf(v + write_pos, maxlen - write_pos, "%u ", data);
 			if (returnSize < 0) {
-				continue;
+				return NULL;
 			}
 			write_pos += (unsigned int)returnSize;
 		} else {
