@@ -28,6 +28,25 @@
 #include <libexif/i18n.h>
 
 #define DATA_LENGTH 1024
+#define BLANK_SIZE 1
+
+/* Get length of number for value in unsigned integer */
+uint32_t get_unsigned_int_length(uint32_t value) {
+    if (value == 0) {
+        return 1;
+    }
+    return (uint32_t)log10(value) + 1;
+}
+
+/* Get length of number for value in signed integer */
+uint32_t get_signed_int_length(int32_t value) {
+    if (value == 0) {
+        return 1;
+    }
+
+    /* If the number is negative, include the '-' sign in the length */
+    return (uint32_t)log10(abs(value)) + (value < 0 ? 2 : 1);
+}
 
 char *
 mnote_huawei_entry_get_value(MnoteHuaweiEntry *e, char *v, unsigned int maxlen)
@@ -66,15 +85,36 @@ mnote_huawei_entry_get_value(MnoteHuaweiEntry *e, char *v, unsigned int maxlen)
 		if (e->format == EXIF_FORMAT_UNDEFINED) {
             ExifLong data = 0;
 			data = (e->data + i)[0];
-            write_pos += (unsigned int)snprintf(v + write_pos, maxlen - write_pos, "%u ", data);
+			if ((get_unsigned_int_length(data) + BLANK_SIZE) > (maxlen - write_pos)) {
+				return NULL;
+			}
+			int returnSize = snprintf(v + write_pos, maxlen - write_pos, "%u ", data);
+			if (returnSize < 0) {
+				return NULL;
+			}
+			write_pos += (unsigned int)returnSize;
 		} else if (e->format == EXIF_FORMAT_SLONG) {
             ExifSLong data = 0;
             data = exif_get_slong(e->data + i * sizeof(ExifSLong), e->order);
-            write_pos += (unsigned int)snprintf(v + write_pos, maxlen - write_pos, "%d ", data);
+			if ((get_signed_int_length(data) + BLANK_SIZE) > (maxlen - write_pos)) {
+				return NULL;
+			}
+			int returnSize = snprintf(v + write_pos, maxlen - write_pos, "%d ", data);
+			if (returnSize < 0) {
+				return NULL;
+			}
+			write_pos += (unsigned int)returnSize;
 		} else if (e->format == EXIF_FORMAT_LONG) {
             ExifLong data = 0;
 			data = exif_get_long(e->data + i * sizeof(ExifLong), e->order);
-            write_pos += (unsigned int)snprintf(v + write_pos, maxlen - write_pos, "%u ", data);
+			if ((get_unsigned_int_length(data) + BLANK_SIZE) > (maxlen - write_pos)) {
+				return NULL;
+			}
+			int returnSize = snprintf(v + write_pos, maxlen - write_pos, "%u ", data);
+			if (returnSize < 0) {
+				return NULL;
+			}
+			write_pos += (unsigned int)returnSize;
 		} else {
 			snprintf(v, maxlen, _("unsupported data types: %d"), e->format);
 			return NULL;
