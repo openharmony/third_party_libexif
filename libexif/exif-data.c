@@ -50,6 +50,7 @@
 #define JPEG_MARKER_APP1 0xe1
 #undef JPEG_HEADER_LEN
 #define JPEG_HEADER_LEN 6
+#define ENTRY_SIZE 12
 
 #define CHECKOVERFLOW(offset,datasize,structsize) (( offset >= datasize) || (structsize > datasize) || (offset > datasize - structsize ))
 
@@ -605,6 +606,13 @@ exif_data_load_data_content (ExifData *data, ExifIfd ifd,
 	}
 
 	for (i = 0; i < n; i++) {
+
+		/* Check if we have enough data. */
+		if (CHECKOVERFLOW(offset + ENTRY_SIZE * i, ds, sizeof(ExifShort))) {
+			exif_log (data->priv->log, EXIF_LOG_CODE_CORRUPT_DATA, "ExifData",
+					"Tag data past end of buffer (%u+2 > %u)", offset + ENTRY_SIZE * i, ds);
+			return;
+		}
 
 		tag = exif_get_short (d + offset + 12 * i, data->priv->order);
 		switch (tag) {
