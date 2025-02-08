@@ -150,8 +150,16 @@ exif_content_add_entry (ExifContent *c, ExifEntry *entry)
 		return;
 	}
 
-	entries = exif_mem_realloc (c->priv->mem,
-		c->entries, sizeof (ExifEntry*) * (c->count + 1));
+	/* Add the entry */
+	if (c->entries) {
+		entries = exif_mem_realloc (c->priv->mem,
+			c->entries, sizeof (ExifEntry*) * (c->count + 1));
+	} 
+	else {
+		entries = exif_mem_alloc (c->priv->mem,
+			sizeof (ExifEntry*) * (c->count + 1));
+	}
+
 	if (!entries) return;
 	entry->parent = c;
 	entries[c->count++] = entry;
