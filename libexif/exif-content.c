@@ -154,8 +154,7 @@ exif_content_add_entry (ExifContent *c, ExifEntry *entry)
 	if (c->entries) {
 		entries = exif_mem_realloc (c->priv->mem,
 			c->entries, sizeof (ExifEntry*) * (c->count + 1));
-	} 
-	else {
+	} else {
 		entries = exif_mem_alloc (c->priv->mem,
 			sizeof (ExifEntry*) * (c->count + 1));
 	}
