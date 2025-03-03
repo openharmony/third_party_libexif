@@ -29,6 +29,7 @@
 
 #define DATA_LENGTH 1024
 #define BLANK_SIZE 1
+#define TIMESTAMP_LENGTH 10
 
 /* Get length of number for value in unsigned integer */
 uint32_t get_unsigned_int_length(uint32_t value) {
@@ -146,10 +147,10 @@ mnote_huawei_entry_rational_timestamp_process(char *buff, const int buff_size, c
 		int offset = increment * components_local;
 		char timestamp_buff[11] = {0};
 		snprintf(timestamp_buff, sizeof(timestamp_buff), "%s", timestamp_char);
-		unsigned long numerator = strtoul(timestamp_buff, NULL, 10);
+		unsigned long numerator = strtoul(timestamp_buff, NULL, TIMESTAMP_LENGTH);
 
-		snprintf(timestamp_buff, 8, "%s", timestamp_char+10);
-		unsigned long denominator = strtoul(timestamp_buff, NULL, 10);
+		snprintf(timestamp_buff, 8, "%s", timestamp_char + TIMESTAMP_LENGTH);
+		unsigned long denominator = strtoul(timestamp_buff, NULL, TIMESTAMP_LENGTH);
 
 		ExifRational r = {
 			.numerator = numerator,
@@ -164,8 +165,9 @@ mnote_huawei_entry_rational_timestamp_process(char *buff, const int buff_size, c
 
 FINISH:
 	*components = components_local;
-	if (!components_local)
+	if (!components_local) {
 		ret = -1;
+	}
 	if (pv)
 		exif_mem_free(mem, pv);
 	return ret;
@@ -220,8 +222,9 @@ mnote_huawei_entry_value_process(char *buff, const int buff_size, const char *v,
 
 FINISH:
 	*components = components_local;
-	if (!components_local)
+	if (!components_local) {
 		ret = -1;
+	}
 	if (pv)
 		exif_mem_free(mem, pv);
 	return ret;
