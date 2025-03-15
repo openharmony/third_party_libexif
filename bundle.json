@@ -22,7 +22,7 @@
         "rom": "196KB",
         "ram": "392KB",
         "deps": {
-            "components": [],
+            "components": [ "bounds_checking_function" ],
             "third_party": []
         },
         "build": {

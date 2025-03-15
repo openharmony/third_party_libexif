@@ -30,6 +30,7 @@
 #define DATA_LENGTH 1024
 #define BLANK_SIZE 1
 #define TIMESTAMP_LENGTH 10
+#define TIMESTAMP_YEAR_MONTH_DAY 8
 
 /* Get length of number for value in unsigned integer */
 uint32_t get_unsigned_int_length(uint32_t value) {
@@ -62,7 +63,10 @@ mnote_huawei_entry_get_value(MnoteHuaweiEntry *e, char *v, unsigned int maxlen)
     }
 
 	if (e->format == EXIF_FORMAT_ASCII) {
-		snprintf(v, maxlen, _("%s"), e->data);
+		int returnSize = snprintf_s(v, maxlen, maxlen, _("%s"), e->data);
+		if (returnSize < 0) {
+			return NULL;
+		}
 		return v;
 	}
 
@@ -71,11 +75,19 @@ mnote_huawei_entry_get_value(MnoteHuaweiEntry *e, char *v, unsigned int maxlen)
 			unsigned long offset = i * exif_format_get_size(e->format);
 			ExifRational r = exif_get_rational(e->data + offset, e->order);
 			if (r.denominator == 0) {
-				write_pos += (unsigned int)snprintf(v + write_pos, maxlen - write_pos, "%u ",
-									  r.numerator);
+				int returnSize = snprintf_s(v + write_pos, maxlen - write_pos,
+					maxlen - write_pos, "%u ", r.numerator);
+				if (returnSize < 0) {
+					return NULL;
+				}
+				write_pos += (unsigned int)returnSize;
 			} else {
-				write_pos += (unsigned int)snprintf(v + write_pos, maxlen - write_pos, "%u%u ",
-									  r.numerator, r.denominator);
+				int returnSize = snprintf_s(v + write_pos, maxlen - write_pos,
+					maxlen - write_pos, "%u%u ", r.numerator, r.denominator);
+				if (returnSize < 0) {
+					return NULL;
+				}
+				write_pos += (unsigned int)returnSize;
 			}
 		}
 		*(v + write_pos - 1) = 0;
@@ -146,10 +158,20 @@ mnote_huawei_entry_rational_timestamp_process(char *buff, const int buff_size, c
 	for (; timestamp_char && components_size < buff_size;) {
 		int offset = increment * components_local;
 		char timestamp_buff[11] = {0};
-		snprintf(timestamp_buff, sizeof(timestamp_buff), "%s", timestamp_char);
+		int returnSize = snprintf_s(timestamp_buff, sizeof(timestamp_buff),
+			sizeof(timestamp_buff), "%s", timestamp_char);
+		if (returnSize < 0) {
+			ret = -1;
+			goto FINISH;
+		}
 		unsigned long numerator = strtoul(timestamp_buff, NULL, TIMESTAMP_LENGTH);
 
-		snprintf(timestamp_buff, 8, "%s", timestamp_char + TIMESTAMP_LENGTH);
+		returnSize = snprintf_s(timestamp_buff, TIMESTAMP_YEAR_MONTH_DAY,
+			TIMESTAMP_YEAR_MONTH_DAY, "%s", timestamp_char + TIMESTAMP_LENGTH);
+		if (returnSize < 0) {
+			ret = -1;
+			goto FINISH;
+		}
 		unsigned long denominator = strtoul(timestamp_buff, NULL, TIMESTAMP_LENGTH);
 
 		ExifRational r = {
@@ -178,8 +200,8 @@ mnote_huawei_entry_string_process(char *buff, const int buff_size, const char *v
 									  int *components)
 {
 	int ret = 0;
-	*components = snprintf(buff, buff_size, _("%s"), v);
-	if (!(*components))
+	*components = snprintf_s(buff, buff_size, strlen, _("%s"), v);
+	if ((*components) <= 0)
 		ret = -1;
 	else {
 		*components = *components + 1;
@@ -200,7 +222,7 @@ mnote_huawei_entry_value_process(char *buff, const int buff_size, const char *v,
 		goto FINISH;
 	}
 	*(pv + strlen) = 0;
-	memcpy(pv, v, strlen);
+	memcpy_s(pv, strlen + 1, v, strlen);
 
 	token = strtok(pv, " ");
 	for (; token && components_size < buff_size;) {
@@ -417,8 +439,8 @@ mnote_huawei_entry_initialize(MnoteHuaweiEntry *e, MnoteHuaweiTag tag, ExifByteO
 			e->format = EXIF_FORMAT_ASCII;
 			e->size = e->components * exif_format_get_size(e->format);
 			e->data = mnote_huawei_entry_alloc(e, e->size);
-			if (!e->data) { clear_mnote_huawei_entry(e); break; }
-			snprintf((char*)e->data, e->size, "%s", "[None]");
+			if (!e->data || snprintf_s((char*)e->data, e->size, e->components, "%s", "[None]"))
+			{ clear_mnote_huawei_entry(e); break; }
 			break;
 
 		case MNOTE_MICRO_VIDEO_PRESENTATION_TIMESTAMP_US:
