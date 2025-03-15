@@ -19,6 +19,7 @@
 #include <libexif/exif-format.h>
 #include <libexif/exif-byte-order.h>
 #include <libexif/huawei/mnote-huawei-tag.h>
+#include <securec.h>
 
 typedef struct _MnoteHuaweiEntry        MnoteHuaweiEntry;
 typedef struct _ExifMnoteDataHuawei     ExifMnoteDataHuawei;
