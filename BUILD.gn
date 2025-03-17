@@ -93,7 +93,7 @@ if (defined(ohos_lite)) {  # is on lite Os for ipcamera
     subsystem_name = "thirdparty"
     part_name = "libexif"
 
-    if (is_arkui_x) { # Arkui_x not sopported external_deps
+    if (is_arkui_x) {  # Arkui_x not sopported external_deps
       deps = [ "//third_party/bounds_checking_function:libsec_shared" ]
     } else {
       external_deps = [ "bounds_checking_function:libsec_shared" ]
