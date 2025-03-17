@@ -92,7 +92,12 @@ if (defined(ohos_lite)) {  # is on lite Os for ipcamera
   ohos_source_set("exif_static") {
     subsystem_name = "thirdparty"
     part_name = "libexif"
-    external_deps = [ "bounds_checking_function:libsec_shared" ]
+
+    if (is_arkui_x) {  # Arkui_x not sopported external_deps
+      deps = [ "//third_party/bounds_checking_function:libsec_static" ]
+    } else {
+      external_deps = [ "bounds_checking_function:libsec_shared" ]
+    }
     branch_protector_ret = "pac_ret"
     sources = [
       "//third_party/libexif/libexif/apple/exif-mnote-data-apple.c",
@@ -147,7 +152,11 @@ if (defined(ohos_lite)) {  # is on lite Os for ipcamera
   ohos_shared_library("libexif") {
     branch_protector_ret = "pac_ret"
     deps = [ ":exif_static" ]
-    external_deps = [ "bounds_checking_function:libsec_shared" ]
+    if (is_arkui_x) {
+      deps += [ "//third_party/bounds_checking_function:libsec_static" ]
+    } else {
+      external_deps = [ "bounds_checking_function:libsec_shared" ]
+    }
     public_configs = [ ":build_public_config" ]
     install_images = [ system_base_dir ]
     subsystem_name = "thirdparty"
