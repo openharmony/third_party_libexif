@@ -26,6 +26,7 @@
 #include <libexif/exif-format.h>
 #include <libexif/exif-utils.h>
 #include <libexif/i18n.h>
+#include <securec.h>
 
 #define DATA_LENGTH 1024
 #define BLANK_SIZE 1
