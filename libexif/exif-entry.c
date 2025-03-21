@@ -39,6 +39,7 @@
 #ifndef M_PI
 #define M_PI 3.14159265358979323846
 #endif
+#define HW_FOCUS_MODE_EXIF_MAX_LEN 6
 
 struct _ExifEntryPrivate
 {
@@ -1474,6 +1475,14 @@ exif_entry_get_value (ExifEntry *e, char *val, unsigned int maxlen)
 		exif_mem_free(e->priv->mem, utf16);
 		break;
 	}
+
+    case EXIF_TAG_MAKER_NOTE:
+        if (e->data && e->size <= HW_FOCUS_MODE_EXIF_MAX_LEN) {
+            for (unsigned int i = 0; i < e->size && i < maxlen - 1; ++i) {
+                val[i] = e->data[i];
+            }
+        }
+        break;
 
 	default:
 		/* Use a generic value formatting */
