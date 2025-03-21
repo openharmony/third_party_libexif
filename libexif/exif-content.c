@@ -31,6 +31,11 @@
  * static const unsigned char ExifHeader[] = {0x45, 0x78, 0x69, 0x66, 0x00, 0x00};
  */
 
+const static unsigned char FOCUS_MODE_AUTO[] = {'A', 'u', 't', 'o'};
+const static unsigned char FOCUS_MODE_AF_MF[] = {'A', 'F', '_', 'M', 'F'};
+const static unsigned char FOCUS_MODE_AF_C[] = {'A', 'F', '_', 'C'};
+const static unsigned char FOCUS_MODE_AF_S[] = {'A', 'F', '_', 'S'};
+
 struct _ExifContentPrivate
 {
 	unsigned int ref_count;
@@ -210,6 +215,28 @@ exif_content_get_entry (ExifContent *content, ExifTag tag)
 		if (content->entries[i]->tag == tag)
 			return (content->entries[i]);
 	return (NULL);
+}
+
+ExifEntry *
+exif_content_get_entry_ext (ExifContent *content, ExifTag tag)
+{
+    if (!content) {
+        return (NULL);
+    }
+    for (unsigned int i = 0; i < content->count; i++) {
+        if (content->entries[i]->tag == tag) {
+            unsigned char* data = content->entries[i]->data;
+            if (tag == EXIF_TAG_MAKER_NOTE && data &&
+                (!memcmp(data, FOCUS_MODE_AUTO, sizeof(FOCUS_MODE_AUTO) / sizeof(FOCUS_MODE_AUTO[0])) ||
+                !memcmp(data, FOCUS_MODE_AF_C, sizeof(FOCUS_MODE_AF_C) / sizeof(FOCUS_MODE_AF_C[0])) ||
+                !memcmp(data, FOCUS_MODE_AF_MF, sizeof(FOCUS_MODE_AF_MF) / sizeof(FOCUS_MODE_AF_MF[0])) ||
+                !memcmp(data, FOCUS_MODE_AF_S, sizeof(FOCUS_MODE_AF_S) / sizeof(FOCUS_MODE_AF_S[0])))) {
+                return (content->entries[i]);
+            }
+            continue;
+        }
+    }
+    return (NULL);
 }
 
 ExifEntry *
