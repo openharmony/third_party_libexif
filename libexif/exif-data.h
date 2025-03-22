@@ -270,6 +270,18 @@ void exif_data_log  (ExifData *data, ExifLog *log);
 	 exif_content_get_entry(d->ifd[EXIF_IFD_INTEROPERABILITY],t) ?	\
 	 exif_content_get_entry(d->ifd[EXIF_IFD_INTEROPERABILITY],t) : NULL)
 
+#define exif_data_get_entry_ext(d,t)					\
+	(exif_content_get_entry_ext(d->ifd[EXIF_IFD_0],t) ?			\
+	 exif_content_get_entry_ext(d->ifd[EXIF_IFD_0],t) :			\
+	 exif_content_get_entry_ext(d->ifd[EXIF_IFD_1],t) ?			\
+	 exif_content_get_entry_ext(d->ifd[EXIF_IFD_1],t) :			\
+	 exif_content_get_entry_ext(d->ifd[EXIF_IFD_EXIF],t) ?		\
+	 exif_content_get_entry_ext(d->ifd[EXIF_IFD_EXIF],t) :		\
+	 exif_content_get_entry_ext(d->ifd[EXIF_IFD_GPS],t) ?		\
+	 exif_content_get_entry_ext(d->ifd[EXIF_IFD_GPS],t) :		\
+	 exif_content_get_entry_ext(d->ifd[EXIF_IFD_INTEROPERABILITY],t) ?	\
+	 exif_content_get_entry_ext(d->ifd[EXIF_IFD_INTEROPERABILITY],t) : NULL)
+
 #ifdef __cplusplus
 }
 #endif /* __cplusplus */
