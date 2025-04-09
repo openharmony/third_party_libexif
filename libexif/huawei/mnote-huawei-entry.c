@@ -22,6 +22,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <math.h>
+#include <limits.h>
 
 #include <libexif/exif-format.h>
 #include <libexif/exif-utils.h>
@@ -30,6 +31,7 @@
 
 #define DATA_LENGTH 1024
 #define BLANK_SIZE 1
+#define PARSE_BASE_DECIMAL 10
 #define TIMESTAMP_LENGTH 10
 #define TIMESTAMP_YEAR_MONTH_DAY 8
 
@@ -165,7 +167,12 @@ mnote_huawei_entry_rational_timestamp_process(char *buff, const int buff_size, c
 			ret = -1;
 			goto FINISH;
 		}
-		unsigned long numerator = strtoul(timestamp_buff, NULL, TIMESTAMP_LENGTH);
+		errno = 0;
+		unsigned long numerator = strtoul(timestamp_buff, NULL, PARSE_BASE_DECIMAL);
+		if (errno == ERANGE && numerator == ULONG_MAX) {
+			ret = -1;
+			goto FINISH;
+		}
 
 		returnSize = snprintf_s(timestamp_buff, TIMESTAMP_YEAR_MONTH_DAY,
 			TIMESTAMP_YEAR_MONTH_DAY, "%s", timestamp_char + TIMESTAMP_LENGTH);
@@ -173,7 +180,12 @@ mnote_huawei_entry_rational_timestamp_process(char *buff, const int buff_size, c
 			ret = -1;
 			goto FINISH;
 		}
-		unsigned long denominator = strtoul(timestamp_buff, NULL, TIMESTAMP_LENGTH);
+		errno = 0;
+		unsigned long denominator = strtoul(timestamp_buff, NULL, PARSE_BASE_DECIMAL);
+		if (errno == ERANGE && denominator == ULONG_MAX) {
+			ret = -1;
+			goto FINISH;
+		}
 
 		ExifRational r = {
 			.numerator = numerator,
@@ -202,9 +214,9 @@ mnote_huawei_entry_string_process(char *buff, const int buff_size, const char *v
 {
 	int ret = 0;
 	*components = snprintf_s(buff, buff_size, strlen, _("%s"), v);
-	if ((*components) <= 0)
+	if ((*components) <= 0) {
 		ret = -1;
-	else {
+	} else {
 		*components = *components + 1;
 	}
 	return ret;
@@ -381,95 +393,98 @@ clear_mnote_huawei_entry (MnoteHuaweiEntry *e)
 	e->size = 0;
 }
 
-void
-mnote_huawei_entry_initialize(MnoteHuaweiEntry *e, MnoteHuaweiTag tag, ExifByteOrder order)
+static const unsigned int VIDEO_TIMESTAMP_COMPONENTS = 8;
+
+/* Base information about Huawei tags */
+static const HuaweiTagInitInfo huawei_tag_init_table[] = {
+	{ MNOTE_HUAWEI_SCENE_INFO, EXIF_FORMAT_LONG, 1, NULL, 0 },
+	{ MNOTE_HUAWEI_FACE_INFO, EXIF_FORMAT_LONG, 1, NULL, 0 },
+	{ MNOTE_HUAWEI_CAPTURE_MODE, EXIF_FORMAT_LONG, 1, NULL, 0 },
+	{ MNOTE_HUAWEI_BURST_NUMBER, EXIF_FORMAT_LONG, 1, NULL, 0 },
+	{ MNOTE_HUAWEI_FRONT_CAMERA, EXIF_FORMAT_LONG, 1, NULL, 0 },
+	{ MNOTE_HUAWEI_PHYSICAL_APERTURE, EXIF_FORMAT_LONG, 1, NULL, 0 },
+	{ MNOTE_MOVING_PHOTO_VERSION, EXIF_FORMAT_LONG, 1, NULL, 0 },
+	{ MNOTE_HUAWEI_FACE_VERSION, EXIF_FORMAT_LONG, 1, NULL, 0 },
+	{ MNOTE_HUAWEI_FACE_COUNT, EXIF_FORMAT_LONG, 1, NULL, 0 },
+	{ MNOTE_HUAWEI_FACE_CONF, EXIF_FORMAT_LONG, 1, NULL, 0 },
+	{ MNOTE_HUAWEI_SCENE_VERSION, EXIF_FORMAT_LONG, 1, NULL, 0 },
+	{ MNOTE_HUAWEI_SCENE_FOOD_CONF, EXIF_FORMAT_LONG, 1, NULL, 0 },
+	{ MNOTE_HUAWEI_SCENE_STAGE_CONF, EXIF_FORMAT_LONG, 1, NULL, 0 },
+	{ MNOTE_HUAWEI_SCENE_BLUESKY_CONF, EXIF_FORMAT_LONG, 1, NULL, 0 },
+	{ MNOTE_HUAWEI_SCENE_GREENPLANT_CONF, EXIF_FORMAT_LONG, 1, NULL, 0 },
+	{ MNOTE_HUAWEI_SCENE_BEACH_CONF, EXIF_FORMAT_LONG, 1, NULL, 0 },
+	{ MNOTE_HUAWEI_SCENE_SNOW_CONF, EXIF_FORMAT_LONG, 1, NULL, 0 },
+	{ MNOTE_HUAWEI_SCENE_SUNSET_CONF, EXIF_FORMAT_LONG, 1, NULL, 0 },
+	{ MNOTE_HUAWEI_SCENE_FLOWERS_CONF, EXIF_FORMAT_LONG, 1, NULL, 0 },
+	{ MNOTE_HUAWEI_SCENE_NIGHT_CONF, EXIF_FORMAT_LONG, 1, NULL, 0 },
+	{ MNOTE_HUAWEI_SCENE_TEXT_CONF, EXIF_FORMAT_LONG, 1, NULL, 0 },
+
+	{ MNOTE_HUAWEI_ROLL_ANGLE, EXIF_FORMAT_SLONG, 1, NULL, 0 },
+	{ MNOTE_HUAWEI_PITCH_ANGLE, EXIF_FORMAT_SLONG, 1, NULL, 0 },
+	{ MNOTE_HUAWEI_FOCUS_MODE, EXIF_FORMAT_SLONG, 1, NULL, 0 },
+	{ MNOTE_HUAWEI_IS_XMAGE_SUPPORTED, EXIF_FORMAT_SLONG, 1, NULL, 0 },
+	{ MNOTE_HUAWEI_XMAGE_MODE, EXIF_FORMAT_SLONG, 1, NULL, 0 },
+	{ MNOTE_HUAWEI_XMAGE_LEFT, EXIF_FORMAT_SLONG, 1, NULL, 0 },
+	{ MNOTE_HUAWEI_XMAGE_TOP, EXIF_FORMAT_SLONG, 1, NULL, 0 },
+	{ MNOTE_HUAWEI_XMAGE_RIGHT, EXIF_FORMAT_SLONG, 1, NULL, 0 },
+	{ MNOTE_HUAWEI_XMAGE_BOTTOM, EXIF_FORMAT_SLONG, 1, NULL, 0 },
+	{ MNOTE_HUAWEI_CLOUD_ENHANCEMENT_MODE, EXIF_FORMAT_SLONG, 1, NULL, 0 },
+	{ MNOTE_HUAWEI_WIND_SNAPSHOT_MODE, EXIF_FORMAT_SLONG, 1, NULL, 0 },
+	{ MNOTE_HUAWEI_AI_EDIT, EXIF_FORMAT_SLONG, 1, NULL, 0 },
+
+	{ MNOTE_MOVING_PHOTO_ID, EXIF_FORMAT_ASCII, sizeof("[None]"), "[None]", 0 },
+
+	{ MNOTE_MICRO_VIDEO_PRESENTATION_TIMESTAMP_US,
+		EXIF_FORMAT_RATIONAL, VIDEO_TIMESTAMP_COMPONENTS, NULL, 1 },
+	{ MNOTE_HUAWEI_FACE_SMILE_SCORE, EXIF_FORMAT_UNDEFINED, 1, NULL, 0 },
+	{ MNOTE_HUAWEI_FACE_RECT, EXIF_FORMAT_UNDEFINED, 1, NULL, 0 },
+	{ MNOTE_HUAWEI_FACE_LEYE_CENTER, EXIF_FORMAT_UNDEFINED, 1, NULL, 0 },
+	{ MNOTE_HUAWEI_FACE_REYE_CENTER, EXIF_FORMAT_UNDEFINED, 1, NULL, 0 },
+	{ MNOTE_HUAWEI_FACE_MOUTH_CENTER, EXIF_FORMAT_UNDEFINED, 1, NULL, 0 },
+};
+
+
+void mnote_huawei_entry_initialize(MnoteHuaweiEntry *e, MnoteHuaweiTag tag, ExifByteOrder order)
 {
 	if (!e || e->data)
 		return;
+
 	e->tag = tag;
 	e->order = order;
-	switch (tag) {
-		case MNOTE_HUAWEI_SCENE_INFO:
-		case MNOTE_HUAWEI_FACE_INFO:
-		case MNOTE_HUAWEI_CAPTURE_MODE:
-		case MNOTE_HUAWEI_BURST_NUMBER:
-		case MNOTE_HUAWEI_FRONT_CAMERA:
-		case MNOTE_HUAWEI_PHYSICAL_APERTURE:
-		case MNOTE_MOVING_PHOTO_VERSION:
-		case MNOTE_HUAWEI_FACE_VERSION:
-		case MNOTE_HUAWEI_FACE_COUNT:
-		case MNOTE_HUAWEI_FACE_CONF:
-		case MNOTE_HUAWEI_SCENE_VERSION:
-		case MNOTE_HUAWEI_SCENE_FOOD_CONF:
-		case MNOTE_HUAWEI_SCENE_STAGE_CONF:
-		case MNOTE_HUAWEI_SCENE_BLUESKY_CONF:
-		case MNOTE_HUAWEI_SCENE_GREENPLANT_CONF:
-		case MNOTE_HUAWEI_SCENE_BEACH_CONF:
-		case MNOTE_HUAWEI_SCENE_SNOW_CONF:
-		case MNOTE_HUAWEI_SCENE_SUNSET_CONF:
-		case MNOTE_HUAWEI_SCENE_FLOWERS_CONF:
-		case MNOTE_HUAWEI_SCENE_NIGHT_CONF:
-		case MNOTE_HUAWEI_SCENE_TEXT_CONF:
-			e->components = 1;
-			e->format = EXIF_FORMAT_LONG;
-			e->size = e->components * exif_format_get_size(e->format);
-			e->data = mnote_huawei_entry_alloc(e, e->size);
-			if (!e->data) { clear_mnote_huawei_entry(e); break; }
-			break;
-		case MNOTE_HUAWEI_ROLL_ANGLE:
-		case MNOTE_HUAWEI_PITCH_ANGLE:
-		case MNOTE_HUAWEI_FOCUS_MODE:
-        case MNOTE_HUAWEI_IS_XMAGE_SUPPORTED:
-        case MNOTE_HUAWEI_XMAGE_MODE:
-        case MNOTE_HUAWEI_XMAGE_LEFT:
-        case MNOTE_HUAWEI_XMAGE_TOP:
-        case MNOTE_HUAWEI_XMAGE_RIGHT:
-        case MNOTE_HUAWEI_XMAGE_BOTTOM:
-        case MNOTE_HUAWEI_CLOUD_ENHANCEMENT_MODE:
-        case MNOTE_HUAWEI_WIND_SNAPSHOT_MODE:
-        case MNOTE_HUAWEI_AI_EDIT:
-			e->components = 1;
-			e->format = EXIF_FORMAT_SLONG;
-			e->size = e->components * exif_format_get_size(e->format);
-			e->data = mnote_huawei_entry_alloc(e, e->size);
-			if (!e->data) { clear_mnote_huawei_entry(e); break; }
-			break;
 
-		case MNOTE_MOVING_PHOTO_ID:
-			e->components = sizeof("[None]");
-			e->format = EXIF_FORMAT_ASCII;
-			e->size = e->components * exif_format_get_size(e->format);
-			e->data = mnote_huawei_entry_alloc(e, e->size);
-			if (!e->data || snprintf_s((char*)e->data, e->size, e->components, "%s", "[None]"))
-			{ clear_mnote_huawei_entry(e); break; }
+	const HuaweiTagInitInfo *info = NULL;
+	for (size_t i = 0; i < sizeof(huawei_tag_init_table) / sizeof(huawei_tag_init_table[0]); ++i) {
+		if (huawei_tag_init_table[i].tag == tag) {
+			info = &huawei_tag_init_table[i];
 			break;
+		}
+	}
 
-		case MNOTE_MICRO_VIDEO_PRESENTATION_TIMESTAMP_US:
-			e->components = 8;
-			e->format = EXIF_FORMAT_RATIONAL;
-			e->size = e->components * exif_format_get_size(e->format);
-			e->data = mnote_huawei_entry_alloc(e, e->size);
-			if (!e->data) { clear_mnote_huawei_entry(e); break; }
+	if (info) {
+		e->components = info->components;
+		e->format = info->format;
+		e->size = e->components * exif_format_get_size(e->format);
+		e->data = mnote_huawei_entry_alloc(e, e->size);
+		if (!e->data) {
+			clear_mnote_huawei_entry(e);
+			return;
+		}
+
+		if (info->default_ascii) {
+			if (snprintf_s((char *)e->data, e->size, e->components, "%s", info->default_ascii)) {
+				clear_mnote_huawei_entry(e);
+				return;
+			}
+		}
+
+		if (info->zero_initialize) {
 			memset(e->data, 0, e->size);
-			break;
-
-		case MNOTE_HUAWEI_FACE_SMILE_SCORE:
-		case MNOTE_HUAWEI_FACE_RECT:
-		case MNOTE_HUAWEI_FACE_LEYE_CENTER:
-		case MNOTE_HUAWEI_FACE_REYE_CENTER:
-		case MNOTE_HUAWEI_FACE_MOUTH_CENTER:
-			e->components = 1;
-			e->format = EXIF_FORMAT_UNDEFINED;
-			e->size = e->components * exif_format_get_size(e->format);
-			e->data = mnote_huawei_entry_alloc(e, e->size);
-			if (!e->data) { clear_mnote_huawei_entry(e); break; }
-			break;
-
-		default:
-			e->components = 0;
-			e->format = EXIF_FORMAT_UNDEFINED;
-			e->size = 0;
-			e->data = NULL;
-			break;
+		}
+		
+	} else {
+		e->components = 0;
+		e->format = EXIF_FORMAT_UNDEFINED;
+		e->size = 0;
+		e->data = NULL;
 	}
 }
