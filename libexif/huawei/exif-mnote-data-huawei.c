@@ -313,7 +313,7 @@ exif_mnote_data_huawei_load_data (ExifMnoteData *ne, const unsigned char *buf, u
             }
 			memcpy (entries[tcount].data, buf + order_offset + t_offset - HUAWEI_HEADER_OFFSET, components_size);	
 		} else {
-            if (CHECKOVERFLOW(*cur_ifd_data_offset + t_offset, buf_size, components_size)) {
+            if (CHECKOVERFLOW(ifd_data - buf + t_offset, buf_size, components_size)) {
                 exif_log (ne->log, EXIF_LOG_CODE_CORRUPT_DATA,
                           "ExifMnoteDataHuawei", "Tag data past end of buffer");
                 continue;
