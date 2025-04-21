@@ -66,7 +66,7 @@ mnote_huawei_entry_get_value(MnoteHuaweiEntry *e, char *v, unsigned int maxlen)
     }
 
 	if (e->format == EXIF_FORMAT_ASCII) {
-		int returnSize = snprintf_s(v, maxlen, maxlen, _("%s"), e->data);
+		int returnSize = snprintf_s(v, maxlen, maxlen, _("%.*s"), e->size, e->data);
 		if (returnSize < 0) {
 			return NULL;
 		}
