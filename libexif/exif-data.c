@@ -1902,3 +1902,23 @@ exif_data_get_data_type (ExifData *d)
 {
 	return (d && d->priv) ? d->priv->data_type : EXIF_DATA_TYPE_UNKNOWN;
 }
+
+int exif_data_get_maker_note_entry_count(ExifData *data) 
+{
+	int count = 0;
+	if (!data || !data->priv) {
+		return 0;
+	}
+	for (int i = 0; i < EXIF_IFD_COUNT; i++) {
+		if (!data->ifd[i]) {
+			continue;
+		}
+		for (int j = 0; j < data->ifd[i]->count; j++) {
+			ExifEntry *e = data->ifd[i]->entries[j];
+			if (e && e->tag == EXIF_TAG_MAKER_NOTE) {
+				count++;
+			}
+		}
+	}
+	return count;
+}

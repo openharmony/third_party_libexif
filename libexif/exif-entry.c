@@ -1477,7 +1477,7 @@ exif_entry_get_value (ExifEntry *e, char *val, unsigned int maxlen)
 	}
 
     case EXIF_TAG_MAKER_NOTE:
-        if (e->data && e->size <= HW_FOCUS_MODE_EXIF_MAX_LEN) {
+        if (e->data && e->size <= maxlen) {
             for (unsigned int i = 0; i < e->size && i < maxlen - 1; ++i) {
                 val[i] = e->data[i];
             }

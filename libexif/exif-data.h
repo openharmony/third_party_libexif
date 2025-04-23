@@ -283,6 +283,14 @@ void exif_data_log  (ExifData *data, ExifLog *log);
 	 exif_content_get_entry_ext(d->ifd[EXIF_IFD_INTEROPERABILITY],t) ?	\
 	 exif_content_get_entry_ext(d->ifd[EXIF_IFD_INTEROPERABILITY],t) : NULL)
 
+/*! Return the number of entries in the MakerNote section of the EXIF data.
+ *
+ * This function retrieves the count of MakerNote entries present in the EXIF data structure.
+ *
+ * \param[in] data EXIF data
+ * \return Number of MakerNote entries
+ */
+int exif_data_get_maker_note_entry_count (ExifData *data);
 #ifdef __cplusplus
 }
 #endif /* __cplusplus */
