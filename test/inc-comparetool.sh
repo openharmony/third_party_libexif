@@ -1,5 +1,4 @@
-# -*- sh -*-
-#
+#!/bin/sh
 # cmp(1) creates the same exit code as diff in case of files being
 # different or the same, even though the diff(1) output is more
 # informative
