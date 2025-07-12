@@ -53,6 +53,14 @@ uint32_t get_signed_int_length(int32_t value) {
     return (uint32_t)log10(abs(value)) + (value < 0 ? 2 : 1);
 }
 
+/* Get length of number for value in unsigned char */
+uint32_t get_unsigned_char_length(uint32_t value) {
+    if (value == 0) {
+        return 1;
+    }
+    return (uint32_t)log10(value) + 1;
+}
+
 char *
 mnote_huawei_entry_get_value(MnoteHuaweiEntry *e, char *v, unsigned int maxlen)
 {
@@ -127,6 +135,17 @@ mnote_huawei_entry_get_value(MnoteHuaweiEntry *e, char *v, unsigned int maxlen)
 				return NULL;
 			}
 			int returnSize = snprintf(v + write_pos, maxlen - write_pos, "%u ", data);
+			if (returnSize < 0) {
+				return NULL;
+			}
+			write_pos += (unsigned int)returnSize;
+		} else if (e->format == EXIF_FORMAT_BYTE) {
+			ExifByte data = 0;
+			data = e->data[i];
+			if ((get_unsigned_char_length(data) + BLANK_SIZE) > (maxlen - write_pos)) {
+				return NULL;
+			}
+			int returnSize = snprintf(v + write_pos, maxlen - write_pos, "%d ", data);
 			if (returnSize < 0) {
 				return NULL;
 			}
@@ -277,7 +296,7 @@ mnote_huawei_entry_set_value(MnoteHuaweiEntry *e, const char *v, int strlen)
 		goto FINISH;
 	}
 
-	if (e->format == EXIF_FORMAT_UNDEFINED || e->format == EXIF_FORMAT_ASCII) {
+	if (e->format == EXIF_FORMAT_UNDEFINED || e->format == EXIF_FORMAT_ASCII || e->format == EXIF_FORMAT_BYTE) {
 		increment = 1;
 	} else if (e->format == EXIF_FORMAT_SLONG || e->format == EXIF_FORMAT_LONG) {
 		increment = 4;
