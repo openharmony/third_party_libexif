@@ -38,37 +38,38 @@ struct _MnoteHuaweiEntry {
 };
 
 /*
- * This structure is used to store the initialization information for each tag.
- * It is used to initialize the tag when the tag is created.
+ * This struct is used to store MnoteHuaweiTag and their associated initialization information.
+ * It defines the data format, component count, default values, and other initialization options for each tag.
  */
 typedef struct {
-	/*
-	 * Huawei custom tag type
-	 */
-	MnoteHuaweiTag tag;
-
-	/*
-	 * Exif format type
-	 */
-	ExifFormat format;
-
-	/*
-	 * Number of components
-	 * For example, the number of components for the tag MNOTE_HUAWEI_SCENE_INFO is 1.
-	 */
-	unsigned int components;
-
-	/*
-	 * Default ASCII value
-	 * For example, the default ASCII value for the tag MNOTE_HUAWEI_SCENE_INFO is "[None]".
-	 */
-	const char *default_ascii;
-
-	/*
-	 * Number of rational components
-	 * false is 0, true is 1
-	 */
-	int zero_initialize;
+    /*
+     * Huawei custom Exif tag type, representing specific metadata items.
+     */
+    MnoteHuaweiTag tag;
+    
+    /*
+     * Exif data format, defining the data type of the tag, such as long integer or rational number.
+     */
+    ExifFormat format;
+    
+    /*
+     * Number of components in the data, indicating how many basic units the data consists of.
+     * For example, MNOTE_HUAWEI_XTSTYLE_EXPOSUREPARAM_PARAM have three components.
+     */
+    unsigned int components;
+    
+    /*
+     * Default ASCII string value for the tag, applicable only to ASCII format tags.
+     * If NULL, it indicates no default value.
+     */
+    const char *default_ascii;
+    
+    /*
+     * Indicates whether to zero-initialize the data during initialization.
+	 * If true, the data area will be set to zero after memory allocation.
+	 * false is 0, true is 1.
+     */
+    int zero_initialize;
 } HuaweiTagInitInfo;
 
 #ifdef __cplusplus
