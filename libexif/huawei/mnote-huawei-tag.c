@@ -42,7 +42,8 @@ static const MnoteHuaweiTable huawei_table[] = {
     {MNOTE_HUAWEI_XMAGE_TOP, "HwMnoteXmageTop", N_("Xmage Top"), "XmageTop"},
     {MNOTE_HUAWEI_XMAGE_RIGHT, "HwMnoteXmageRight", N_("Xmage Right"), "XmageRight"},
     {MNOTE_HUAWEI_XMAGE_BOTTOM, "HwMnoteXmageBottom", N_("Xmage Bottom"), "XmageBottom"},
-    {MNOTE_HUAWEI_CLOUD_ENHANCEMENT_MODE, "HwMnoteCloudEnhancementMode", N_("Cloud Enhancement Mode"), "CloudEnhancementMode"},
+    {MNOTE_HUAWEI_CLOUD_ENHANCEMENT_MODE, "HwMnoteCloudEnhancementMode",
+     N_("Cloud Enhancement Mode"), "CloudEnhancementMode"},
     {MNOTE_HUAWEI_FOCUS_MODE, "HwMnoteFocusMode", N_("Focus Mode"), "FocusMode"},
     {MNOTE_HUAWEI_WIND_SNAPSHOT_MODE, "HwMnoteWindSnapshotMode", N_("Wind Snapshot Mode"), "WindSnapshotMode"},
 	{MNOTE_MOVING_PHOTO_VERSION, "MovingPhotoVersion", N_("Moving Photo Version"),
@@ -51,7 +52,19 @@ static const MnoteHuaweiTable huawei_table[] = {
 	N_("Video Presentation Timestamp US"), "VideoPresentationTimestampUS"},
     {MNOTE_MOVING_PHOTO_ID, "MovingPhotoId", N_("Moving Photo Id"), "MovingPhotoId"},
     {MNOTE_HUAWEI_AI_EDIT, "HwMnoteAiEdit", N_("AI Edit"), "AiEdit"},
-
+	{MNOTE_HUAWEI_XTSTYLE_TEMPLATE_NAME, "HwMnoteXtStyleTemplateName",
+	N_("XtStyle Template Name"), "XtStyleTemplateName"},
+    {MNOTE_HUAWEI_XTSTYLE_CUSTOM_LIGHT_SHADOW, "HwMnoteXtStyleCustomLightAndShadow",
+	N_("XtStyle Custom Light And Shadow"), "XtStyleCustomLightAndShadow"},
+    {MNOTE_HUAWEI_XTSTYLE_CUSTOM_SATURATION, "HwMnoteXtStyleCustomSaturation",
+	N_("XtStyle Custom Saturation"), "XtStyleCustomSaturation"},
+    {MNOTE_HUAWEI_XTSTYLE_CUSTOM_HUE, "HwMnoteXtStyleCustomHue",
+	N_("XtStyle Custom Hue"), "XtStyleCustomHue"},
+    {MNOTE_HUAWEI_XTSTYLE_EXPOSUREPARAM_PARAM, "HwMnoteXtStyleExposureParam",
+	N_("XtStyle Exposure Param"), "XtStyleExposureParam"},
+	{MNOTE_HUAWEI_STARS_INFO, "HwMnoteStarsInfo",
+	N_("Stars Info"), "StarsInfo"},
+	
 	{0, "HwUnknow", N_("Unknow Tag"), "UnknowTag"},
 };
 
