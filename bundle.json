@@ -22,10 +22,7 @@
         "rom": "196KB",
         "ram": "392KB",
         "deps": {
-            "components": [
-                "bounds_checking_function",
-                "hilog"
-            ],
+            "components": [ "bounds_checking_function" ],
             "third_party": []
         },
         "build": {

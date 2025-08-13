@@ -17,23 +17,18 @@
 #include "exif-mnote-data-huawei.h"
 #include "mnote-huawei-entry.h"
 #include "mnote-huawei-tag.h"
-#include "hilog/log.h"
 
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <math.h>
 #include <limits.h>
+#include <stdbool.h>
 
 #include <libexif/exif-format.h>
 #include <libexif/exif-utils.h>
 #include <libexif/i18n.h>
 #include <securec.h>
-
-#undef LOG_DOMAIN
-#define LOG_DOMAIN 0xD002B60
-#undef LOG_TAG
-#define LOG_TAG "mnote-huawei-entry"
 
 #define DATA_LENGTH 1024
 #define BLANK_SIZE 1
@@ -123,7 +118,6 @@ format_exif_components(MnoteHuaweiEntry *e, char *v, unsigned int maxlen, unsign
         }
 
 		if (returnSize < 0) {
-			HILOG_INFO(LOG_CORE, "Do %{public}s snprintf_s fail", __func__);
 			return NULL;
 		}
 		write_pos += (unsigned int)returnSize;
@@ -325,8 +319,6 @@ mnote_huawei_entry_rational_process(char *buff, const int buff_size, const char 
 	}
 	*(pv + strlen) = 0;
 	if (EOK != memcpy_s(pv, strlen + 1, v, strlen)) {
-		HILOG_INFO(LOG_CORE,
-			"memcpy failed at %{public}s, strlen:%{public}d, strlen:%{public}s", __func__, strlen, v);
 		ret = -1;
 		goto FINISH;
 	}
@@ -417,8 +409,6 @@ mnote_huawei_entry_value_process(char *buff, const int buff_size, const char *v,
 	}
 	*(pv + strlen) = 0;
 	if (EOK != memcpy_s(pv, strlen + 1, v, strlen)) {
-		HILOG_INFO(LOG_CORE,
-			"memcpy failed at %{public}s, strlen:%{public}d, strlen:%{public}s", __func__, strlen, v);
 		ret = -1;
 		goto FINISH;
 	}
