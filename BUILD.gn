@@ -94,14 +94,9 @@ if (defined(ohos_lite)) {  # is on lite Os for ipcamera
     part_name = "libexif"
     # arkui-x not supported external_deps
     if (is_arkui_x) {
-      deps = [
-        "//third_party/bounds_checking_function:libsec_static",
-        "//vendor/huawei/base/hiviewdfx/hilog/interfaces/native/innerkits:libhilog"]
+      deps = [ "//third_party/bounds_checking_function:libsec_static" ]
     } else {
-      external_deps = [
-        "bounds_checking_function:libsec_shared",
-        "hilog:libhilog"
-      ]
+      external_deps = [ "bounds_checking_function:libsec_shared" ]
     }
     branch_protector_ret = "pac_ret"
     sources = [
@@ -158,14 +153,9 @@ if (defined(ohos_lite)) {  # is on lite Os for ipcamera
     branch_protector_ret = "pac_ret"
     deps = [ ":exif_static" ]
     if (is_arkui_x) {
-      deps += [
-        "//third_party/bounds_checking_function:libsec_static",
-        "//vendor/huawei/base/hiviewdfx/hilog/interfaces/native/innerkits:libhilog"]
+      deps += [ "//third_party/bounds_checking_function:libsec_static" ]
     } else {
-      external_deps = [
-        "bounds_checking_function:libsec_shared",
-        "hilog:libhilog"
-      ]
+      external_deps = [ "bounds_checking_function:libsec_shared" ]
     }
     public_configs = [ ":build_public_config" ]
     install_images = [ system_base_dir ]
