@@ -210,7 +210,7 @@ exif_mnote_data_huawei_save (ExifMnoteData *ne, unsigned char **buf, unsigned in
 	unsigned int malloc_size = sizeof(HUAWEI_HEADER);
 	
 	exif_mnote_data_huawei_malloc_size_data(ne, &malloc_size);
-	if (!malloc_size) {
+	if (malloc_size < HUAWEI_HEADER_OFFSET) {
 		exif_log (ne->log, EXIF_LOG_CODE_CORRUPT_DATA, "ExifMnoteHuawei", "The memory(%d) request failed", malloc_size);
 		return;
 	}
