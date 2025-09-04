@@ -1066,7 +1066,10 @@ exif_entry_get_value (ExifEntry *e, char *val, unsigned int maxlen)
 			break;
 		}
 		d = (double) v_rat.numerator / (double) v_rat.denominator;
-		snprintf (val, maxlen, "f/%.01f", d);
+		snprintf (val, maxlen, "f/%.02f", d);
+		if (strlen(val) && val[strlen(val) - 1] == '0') {
+			val[strlen(val) - 1] = '\0';
+		}
 		break;
 	case EXIF_TAG_APERTURE_VALUE:
 	case EXIF_TAG_MAX_APERTURE_VALUE:
