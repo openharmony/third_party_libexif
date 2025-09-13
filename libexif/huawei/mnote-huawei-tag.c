@@ -64,6 +64,10 @@ static const MnoteHuaweiTable huawei_table[] = {
 	N_("XtStyle Exposure Param"), "XtStyleExposureParam"},
 	{MNOTE_HUAWEI_STARS_INFO, "HwMnoteStarsInfo",
 	N_("Stars Info"), "StarsInfo"},
+	{MNOTE_HUAWEI_XTSTYLE_ALGO_VERSION, "HwMnoteXtStyleAlgoVersion",
+	N_("Xtstyle Algo Version"), "XtStyleAlgoVersion"},
+	{MNOTE_HUAWEI_XTSTYLE_ALGO_VIDEO_ENABLE, "HwMnoteXtStyleAlgoVideoEnable",
+	N_("Xtstyle Algo Video Enable"), "XtStyleAlgoVideoEnable"},
 	
 	{0, "HwUnknow", N_("Unknow Tag"), "UnknowTag"},
 };
