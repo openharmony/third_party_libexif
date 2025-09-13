@@ -112,6 +112,14 @@ format_exif_components(MnoteHuaweiEntry *e, char *v, unsigned int maxlen, unsign
             }
             returnSize = snprintf_s(v + write_pos, maxlen - write_pos,
                 maxlen - write_pos, "%d ", data);
+        } else if (e->format == EXIF_FORMAT_SHORT) {
+            ExifShort data = 0;
+			data = exif_get_short(e->data + i * sizeof(ExifShort), e->order);
+			if ((get_signed_int_length(data) + BLANK_SIZE) > (maxlen - write_pos)) {
+				return NULL;
+			}
+			returnSize = snprintf_s(v + write_pos, maxlen - write_pos,
+				maxlen - write_pos, "%hu ", data);
         } else {
             snprintf_s(v, maxlen, maxlen, _("unsupported data types: %d"), e->format);
             return NULL;
@@ -628,7 +636,9 @@ static const HuaweiTagInitInfo huawei_tag_init_table[] = {
     { MNOTE_HUAWEI_XTSTYLE_CUSTOM_SATURATION, EXIF_FORMAT_RATIONAL, 1, NULL, 1 },
     { MNOTE_HUAWEI_XTSTYLE_CUSTOM_HUE, EXIF_FORMAT_RATIONAL, 1, NULL, 1 },
     { MNOTE_HUAWEI_XTSTYLE_EXPOSUREPARAM_PARAM, EXIF_FORMAT_SSHORT, THREE_COMPONENTS, NULL, 0 },
-    { MNOTE_HUAWEI_STARS_INFO, EXIF_FORMAT_SLONG, 1, NULL, 0 }
+    { MNOTE_HUAWEI_STARS_INFO, EXIF_FORMAT_SLONG, 1, NULL, 0 },
+	{ MNOTE_HUAWEI_XTSTYLE_ALGO_VERSION, EXIF_FORMAT_SHORT, 1, NULL, 0 },
+	{ MNOTE_HUAWEI_XTSTYLE_ALGO_VIDEO_ENABLE, EXIF_FORMAT_BYTE, 1, NULL, 0 }
 };
 
 void mnote_huawei_entry_initialize(MnoteHuaweiEntry *e, MnoteHuaweiTag tag, ExifByteOrder order)
