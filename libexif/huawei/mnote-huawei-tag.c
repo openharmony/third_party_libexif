@@ -68,6 +68,8 @@ static const MnoteHuaweiTable huawei_table[] = {
 	N_("Xtstyle Algo Version"), "XtStyleAlgoVersion"},
 	{MNOTE_HUAWEI_XTSTYLE_ALGO_VIDEO_ENABLE, "HwMnoteXtStyleAlgoVideoEnable",
 	N_("Xtstyle Algo Video Enable"), "XtStyleAlgoVideoEnable"},
+	{MNOTE_HUAWEI_ANNOTATION_EDIT, "HwMnoteAnnotationEdit",
+	N_("Annotation Edit"), "AnnotationEdit"},
 	
 	{0, "HwUnknow", N_("Unknow Tag"), "UnknowTag"},
 };
