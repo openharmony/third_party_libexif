@@ -1159,7 +1159,12 @@ exif_entry_get_value (ExifEntry *e, char *val, unsigned int maxlen)
 			} else if (cd <= 1) {
 				snprintf (val, maxlen, _("%.1f"), d);
 			} else {
-				snprintf (val, maxlen, _("1/%.0f"), 1. / d);
+				double den = 1. / d;
+				if (den < 1.5) {
+					snprintf (val, maxlen, "%.0f", den);
+				} else {
+					snprintf (val, maxlen, _("1/%.0f"), den);
+				}
 			}
 		} else {
 			if (min_denominator == 1) {
