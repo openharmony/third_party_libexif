@@ -305,7 +305,8 @@ mnote_huawei_entry_get_value(MnoteHuaweiEntry *e, char *v, unsigned int maxlen)
 		return v;
 	}
 
-	if (e->tag == MNOTE_MICRO_VIDEO_PRESENTATION_TIMESTAMP_US) {
+	if (e->tag == MNOTE_MICRO_VIDEO_PRESENTATION_TIMESTAMP_US &&
+		e->format == EXIF_FORMAT_RATIONAL) {
 		return handle_video_timestamp(e, v, maxlen, &write_pos);
 	}
 
@@ -313,7 +314,8 @@ mnote_huawei_entry_get_value(MnoteHuaweiEntry *e, char *v, unsigned int maxlen)
 		return handle_xtstyle(e, v, maxlen, &write_pos);
 	}
 
-	if (e->tag == MNOTE_HUAWEI_STARS_INFO) {
+	if (e->tag == MNOTE_HUAWEI_STARS_INFO &&
+		e->format == EXIF_FORMAT_SLONG) {
 		return handle_stars_info(e, v, maxlen, &write_pos);
 	}
 
