@@ -21,6 +21,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
+#include <securec.h>
 #include <limits.h>
 
 #include <libexif/exif-byte-order.h>
@@ -288,7 +289,11 @@ load_entry_data (ExifMnoteData *ne, MnoteHuaweiEntry *entry,
 			entry->data = NULL;
 			return -1;
 		}
-		memcpy (entry->data, buf + t_size, components_size);
+		if (EOK != memcpy_s (entry->data, components_size, buf + t_size, components_size)) {
+			exif_mem_free (ne->mem, entry->data);
+			entry->data = NULL;
+			return -1;
+		}
 	} else {
 		if (CHECKOVERFLOW(ifd_data - buf + t_offset, buf_size, components_size)) {
 			exif_log (ne->log, EXIF_LOG_CODE_CORRUPT_DATA,
@@ -297,7 +302,11 @@ load_entry_data (ExifMnoteData *ne, MnoteHuaweiEntry *entry,
 			entry->data = NULL;
 			return -1;
 		}
-		memcpy (entry->data, ifd_data + t_offset, components_size);
+		if (EOK != memcpy_s (entry->data, components_size, ifd_data + t_offset, components_size)) {
+			exif_mem_free (ne->mem, entry->data);
+			entry->data = NULL;
+			return -1;
+		}
 	}
 	return 0;
 }
