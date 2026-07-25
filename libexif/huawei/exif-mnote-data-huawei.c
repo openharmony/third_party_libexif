@@ -257,6 +257,20 @@ calc_components_size (ExifMnoteData *ne, ExifFormat format, unsigned long compon
 	return format_size * components;
 }
 
+static void
+free_entries (ExifMnoteData *ne, MnoteHuaweiEntry *entries, size_t count)
+{
+	for (size_t j = 0; j < count; j++) {
+		if (entries[j].data) {
+			exif_mem_free (ne->mem, entries[j].data);
+		}
+		if (entries[j].md) {
+			exif_mnote_data_huawei_free ((ExifMnoteData *)entries[j].md);
+		}
+	}
+	exif_mem_free (ne->mem, entries);
+}
+
 static int
 load_entry_data (ExifMnoteData *ne, MnoteHuaweiEntry *entry,
 		 const unsigned char *buf, unsigned int buf_size,
@@ -281,6 +295,13 @@ load_entry_data (ExifMnoteData *ne, MnoteHuaweiEntry *entry,
 	}
 
 	if (components_size > 4) {
+		if (order_offset + t_offset < (size_t)HUAWEI_HEADER_OFFSET) {
+			exif_log (ne->log, EXIF_LOG_CODE_CORRUPT_DATA,
+				  "ExifMnoteDataHuawei", "Invalid tag offset");
+			exif_mem_free (ne->mem, entry->data);
+			entry->data = NULL;
+			return -1;
+		}
 		unsigned int t_size = order_offset + t_offset - HUAWEI_HEADER_OFFSET;
 		if (CHECKOVERFLOW(t_size, buf_size, components_size)) {
 			exif_log (ne->log, EXIF_LOG_CODE_CORRUPT_DATA,
@@ -408,8 +429,10 @@ exif_mnote_data_huawei_load_data (ExifMnoteData *ne, const unsigned char *buf, u
 			}
 			if (load_nested_ifd (ne, &entries[tcount], buf, buf_size,
 					     cur_ifd_data_offset, order_offset,
-					     load_times, n->order) < 0)
+					     load_times, n->order) < 0) {
+				free_entries (ne, entries, tcount + 1);
 				return -1;
+			}
 		}
 
 		++tcount;
